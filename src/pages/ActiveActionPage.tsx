@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { abortAction, completeAction } from "../api/actions";
+import { abortAction, completeAction, getAction } from "../api/actions";
 import { getApiErrorMessage } from "../api/errors";
-import { getHistory } from "../api/history";
 import { ActiveActionPanel } from "../components/actions/ActiveActionPanel";
 import { Button } from "../components/common/Button";
 import { Card } from "../components/common/Card";
@@ -34,17 +33,10 @@ export function ActiveActionPage() {
     if (!routeActionId || activeAction?.id === routeActionId) return;
 
     setLoading(true);
-    getHistory()
-      .then((history) => {
-        const matchedAction = history.actions.find((action) => action.id === routeActionId);
-        if (matchedAction) {
-          setActiveAction(matchedAction);
-          setStatusMessage(`action #${routeActionId}를 최근 흐름에서 복원했습니다.`);
-          return;
-        }
-        setStatusMessage(
-          "Action 상세 API가 아직 없어 최근 흐름에서 찾지 못한 action은 복원할 수 없습니다.",
-        );
+    getAction(routeActionId)
+      .then((action) => {
+        setActiveAction(action);
+        setStatusMessage(`action #${routeActionId}를 불러왔습니다.`);
       })
       .catch((error) => setStatusMessage(getApiErrorMessage(error)))
       .finally(() => setLoading(false));

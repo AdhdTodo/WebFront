@@ -73,29 +73,15 @@ export function TodayBoardPage() {
   async function handleDo(suggestion: Suggestion) {
     try {
       const response = await createFeedback(suggestion.session_id, suggestion.id, "do");
-      const actionId = response.action?.id ?? response.action_id;
-      if (!actionId) {
-        setStatusMessage("Action ID가 응답에 없습니다. feedback do 흐름을 확인하세요.");
+      if (!response.action) {
+        setStatusMessage("Action 응답이 없습니다. feedback do 흐름을 확인하세요.");
         return;
       }
       setFeedbackCount((count) => count + 1);
-      const nextAction: Action = response.action ?? {
-        // TODO: replace this display shell when the backend exposes GET /actions/{action_id}
-        // or includes the full action object in FeedbackResponse.
-        id: actionId,
-        session_id: suggestion.session_id,
-        suggestion_id: suggestion.id,
-        title: suggestion.title,
-        micro_step: suggestion.micro_step,
-        status: "active",
-        completion_note: null,
-        abort_reason: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      const nextAction: Action = response.action;
       setActiveAction(nextAction);
       setStatusMessage("Feedback do 저장. Action이 생성되었습니다.");
-      navigate(`/actions/${actionId}`);
+      navigate(`/actions/${nextAction.id}`);
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }

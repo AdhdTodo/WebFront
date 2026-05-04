@@ -9,8 +9,6 @@ export async function createAction(sessionId: number, suggestionId?: number) {
   return response.data;
 }
 
-// Prepared for the backend TODO: GET /api/v1/actions/{action_id}.
-// ActiveActionPage currently restores direct action URLs from /me/history.
 export async function getAction(actionId: number) {
   const response = await apiClient.get<Action>(`/actions/${actionId}`);
   return response.data;
