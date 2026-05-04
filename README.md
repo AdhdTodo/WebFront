@@ -29,6 +29,7 @@ Create `.env` from `.env.example`.
 VITE_API_BASE_URL=http://yangtheory.site:8001/api/v1
 VITE_USE_MOCKS=false
 VITE_AI_SUGGESTION_ENABLED=false
+VITE_AI_MODEL=gpt-4.1-mini
 ```
 
 `VITE_USE_MOCKS=false` is the default service mode. Mock data is only shown when
@@ -38,6 +39,10 @@ sample cards.
 `VITE_AI_SUGGESTION_ENABLED` is display-only for the web UI. The backend decides
 whether AI generation is enabled; the frontend shows the current expectation in
 Settings.
+
+The frontend never receives or stores `OPENAI_API_KEY`. React calls only the
+FastAPI backend, and the backend decides whether to use AI or rule-based
+fallback.
 
 ## Run
 
@@ -127,7 +132,7 @@ The backend now supports `GET /api/v1/actions/{action_id}` and includes
 
 Current next items:
 
-- AI quality tuning after real OpenAI usage is enabled.
+- AI prompt quality tuning after real OpenAI usage is enabled.
 - Mobile polish beyond the first responsive pass.
 - Calendar import as a one-time candidate ingestion flow.
 
