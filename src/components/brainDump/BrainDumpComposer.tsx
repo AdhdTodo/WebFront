@@ -1,4 +1,5 @@
 import { Archive, WandSparkles } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "../common/Button";
 import { Card } from "../common/Card";
@@ -6,9 +7,21 @@ import { Textarea } from "../common/Textarea";
 
 interface BrainDumpComposerProps {
   compact?: boolean;
+  defaultValue?: string;
+  loading?: boolean;
+  onSubmit?: (rawText: string) => void;
+  onCaptureOnly?: (rawText: string) => void;
 }
 
-export function BrainDumpComposer({ compact = false }: BrainDumpComposerProps) {
+export function BrainDumpComposer({
+  compact = false,
+  defaultValue = "",
+  loading = false,
+  onSubmit,
+  onCaptureOnly,
+}: BrainDumpComposerProps) {
+  const [rawText, setRawText] = useState(defaultValue);
+
   return (
     <Card
       title={compact ? "Brain Dump" : "New Brain Dump"}
@@ -19,17 +32,29 @@ export function BrainDumpComposer({ compact = false }: BrainDumpComposerProps) {
       }
     >
       <Textarea
+        value={rawText}
+        onChange={(event) => setRawText(event.target.value)}
         rows={compact ? 5 : 10}
         placeholder="예: 발표 준비해야 하는데 자료도 정리해야 하고 교수님께 질문 메일도 보내야 하고..."
       />
       <div className="mt-3 flex items-center justify-between">
         <p className="text-[12px] text-textMuted">쉼표, 줄바꿈, 긴 문장 모두 그대로 두세요.</p>
         <div className="flex gap-2">
-          <Button variant="secondary" icon={<Archive size={15} />}>
+          <Button
+            variant="secondary"
+            icon={<Archive size={15} />}
+            disabled={loading || !rawText.trim()}
+            onClick={() => onCaptureOnly?.(rawText)}
+          >
             기록만
           </Button>
-          <Button variant="primary" icon={<WandSparkles size={15} />}>
-            후보 생성
+          <Button
+            variant="primary"
+            icon={<WandSparkles size={15} />}
+            disabled={loading || !rawText.trim()}
+            onClick={() => onSubmit?.(rawText)}
+          >
+            {loading ? "생성 중" : "후보 생성"}
           </Button>
         </div>
       </div>

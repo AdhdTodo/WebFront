@@ -1,11 +1,35 @@
 import { ArrowRight, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { login, me } from "../api/auth";
 import { Button } from "../components/common/Button";
 import { Input } from "../components/common/Input";
+import { useAuthStore } from "../store/authStore";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { setTokens, setUser } = useAuthStore();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    setLoading(true);
+    setError(null);
+    try {
+      const tokens = await login(email, password);
+      setTokens(tokens.access_token, tokens.refresh_token);
+      const user = await me();
+      setUser(user);
+      navigate("/today");
+    } catch {
+      setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="grid min-h-screen grid-cols-[1.05fr_0.95fr] bg-background">
@@ -52,10 +76,26 @@ export function LoginPage() {
             JWT access / refresh token, login protection, rate limiting이 적용됩니다.
           </p>
           <div className="mt-7 space-y-4">
-            <Input placeholder="email" type="email" />
-            <Input placeholder="password" type="password" />
-            <Button className="w-full" variant="primary" onClick={() => navigate("/today")}>
-              login
+            <Input
+              placeholder="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            <Input
+              placeholder="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            {error && <p className="text-[12px] text-redMuted">{error}</p>}
+            <Button
+              className="w-full"
+              variant="primary"
+              disabled={loading || !email || !password}
+              onClick={handleLogin}
+            >
+              {loading ? "logging in" : "login"}
               <ArrowRight size={15} />
             </Button>
           </div>

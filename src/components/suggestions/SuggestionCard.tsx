@@ -7,9 +7,18 @@ import { Button } from "../common/Button";
 interface SuggestionCardProps {
   suggestion: Suggestion;
   compact?: boolean;
+  onDo?: (suggestion: Suggestion) => void;
+  onMakeSmaller?: (suggestion: Suggestion) => void;
+  onPass?: (suggestion: Suggestion) => void;
 }
 
-export function SuggestionCard({ suggestion, compact = false }: SuggestionCardProps) {
+export function SuggestionCard({
+  suggestion,
+  compact = false,
+  onDo,
+  onMakeSmaller,
+  onPass,
+}: SuggestionCardProps) {
   return (
     <article className="border-l-2 border-primary bg-surface p-4 shadow-subtle">
       <div className="flex items-center justify-between gap-3">
@@ -25,13 +34,17 @@ export function SuggestionCard({ suggestion, compact = false }: SuggestionCardPr
       <p className="mt-2 text-[13px] leading-6 text-textSecondary">{suggestion.micro_step}</p>
       {!compact && (
         <div className="mt-4 flex gap-2">
-          <Button variant="primary" icon={<Check size={14} />}>
+          <Button variant="primary" icon={<Check size={14} />} onClick={() => onDo?.(suggestion)}>
             선택
           </Button>
-          <Button variant="secondary" icon={<ArrowDownToLine size={14} />}>
+          <Button
+            variant="secondary"
+            icon={<ArrowDownToLine size={14} />}
+            onClick={() => onMakeSmaller?.(suggestion)}
+          >
             작게
           </Button>
-          <Button variant="ghost" icon={<MinusCircle size={14} />}>
+          <Button variant="ghost" icon={<MinusCircle size={14} />} onClick={() => onPass?.(suggestion)}>
             pass
           </Button>
         </div>
