@@ -1,6 +1,6 @@
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { login, me } from "../api/auth";
 import { getApiErrorMessage } from "../api/errors";
@@ -10,6 +10,7 @@ import { useAuthStore } from "../store/authStore";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setTokens, setUser } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +25,8 @@ export function LoginPage() {
       setTokens(tokens.access_token, tokens.refresh_token);
       const user = await me();
       setUser(user);
-      navigate("/today");
+      const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+      navigate(from || "/today");
     } catch (error) {
       setError(getApiErrorMessage(error));
     } finally {

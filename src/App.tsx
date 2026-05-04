@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { me } from "./api/auth";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { PublicOnlyRoute } from "./components/auth/PublicOnlyRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ActiveActionPage } from "./pages/ActiveActionPage";
 import { BrainDumpPage } from "./pages/BrainDumpPage";
@@ -19,32 +21,42 @@ export function App() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const logout = useAuthStore((state) => state.logout);
+  const [restoringUser, setRestoringUser] = useState(Boolean(accessToken && !user));
 
   useEffect(() => {
-    if (!accessToken || user) return;
+    if (!accessToken || user) {
+      setRestoringUser(false);
+      return;
+    }
 
+    setRestoringUser(true);
     me()
       .then(setUser)
       .catch(() => {
         logout();
-      });
+      })
+      .finally(() => setRestoringUser(false));
   }, [accessToken, logout, setUser, user]);
 
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/today" replace />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route element={<AppLayout />}>
-        <Route path="/today" element={<TodayBoardPage />} />
-        <Route path="/brain-dumps" element={<BrainDumpPage />} />
-        <Route path="/suggestions" element={<SuggestionsPage />} />
-        <Route path="/sessions/:sessionId/suggestions" element={<SuggestionsPage />} />
-        <Route path="/actions/active" element={<ActiveActionPage />} />
-        <Route path="/actions/:actionId" element={<ActiveActionPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/routines" element={<RoutinesPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+      <Route element={<PublicOnlyRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
+      <Route element={<ProtectedRoute restoringUser={restoringUser} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/today" element={<TodayBoardPage />} />
+          <Route path="/brain-dumps" element={<BrainDumpPage />} />
+          <Route path="/suggestions" element={<SuggestionsPage />} />
+          <Route path="/sessions/:sessionId/suggestions" element={<SuggestionsPage />} />
+          <Route path="/actions/active" element={<ActiveActionPage />} />
+          <Route path="/actions/:actionId" element={<ActiveActionPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/routines" element={<RoutinesPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
       </Route>
     </Routes>
   );

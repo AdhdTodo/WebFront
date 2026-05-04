@@ -22,3 +22,8 @@ export async function me() {
   const response = await apiClient.get<User>("/users/me");
   return response.data;
 }
+
+export async function updateMe(nickname: string) {
+  const response = await apiClient.patch<User>("/users/me", { nickname });
+  return response.data;
+}

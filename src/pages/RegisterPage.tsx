@@ -88,7 +88,7 @@ export function RegisterPage() {
           <Button
             className="w-full"
             variant="primary"
-            disabled={loading || !nickname.trim() || !email || !password || !confirmPassword}
+            disabled={loading || !email || !password || !confirmPassword}
             onClick={handleRegister}
           >
             {loading ? "creating" : "register"}

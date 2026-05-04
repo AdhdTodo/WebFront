@@ -52,6 +52,12 @@ npm install
 npm run dev
 ```
 
+Tests:
+
+```powershell
+npm run test:run
+```
+
 Production-style preview:
 
 ```powershell
@@ -66,6 +72,17 @@ Open:
 ```text
 http://yangtheory.site:5173/today
 ```
+
+Recommended production structure:
+
+```text
+https://yangtheory.site      -> frontend static build
+https://yangtheory.site/api  -> backend reverse proxy
+```
+
+Port-based `:5173` and `:8001` URLs are development/demo only. Build the frontend
+and serve `dist` through nginx with React Router fallback. An example config is
+available at `deploy/nginx.yangtheory.site.conf`.
 
 ## API Flow
 
@@ -88,6 +105,11 @@ http://yangtheory.site:5173/today
     `GET /actions/{actionId}`.
 14. `/history` reads `/me/history` and shows recent flow and reaction signals.
 
+Protected pages are wrapped by `ProtectedRoute`. Logged-out direct access to
+`/today`, `/settings`, `/routines`, `/actions/:actionId`, and session suggestion
+URLs redirects to `/login`. After login, the app can return to the originally
+requested path.
+
 ## Routes
 
 - `/login`
@@ -101,6 +123,21 @@ http://yangtheory.site:5173/today
 - `/history`
 - `/routines`
 - `/settings`
+
+## Routines
+
+`/routines` uses authenticated backend data:
+
+```http
+GET /api/v1/routines
+POST /api/v1/routines
+PATCH /api/v1/routines/{routineId}
+DELETE /api/v1/routines/{routineId}
+```
+
+Routines are user-owned safety net actions. They are small candidates to return
+to when suggestions stall, not checklist pressure. Production mode shows only
+real API data; mock routines are visible only with `VITE_USE_MOCKS=true`.
 
 ## State Handling
 
@@ -126,8 +163,8 @@ Display name priority:
 
 Existing backend users may have `nickname: null`; in that case the UI safely
 falls back to the email prefix. Settings shows nickname/email from the same
-authenticated user object. Profile editing, account deletion, and password
-change are planned follow-up items.
+authenticated user object. Settings can update nickname and refreshes the topbar
+immediately. Account deletion and password change are planned follow-up items.
 
 ## Error States
 
@@ -214,6 +251,13 @@ $env:VITE_USE_MOCKS='false'
 npm run build
 ```
 
+CI runs from `.github/workflows/frontend-ci.yml`:
+
+- Node 20
+- `npm ci`
+- `npm run test:run`
+- `npm run build`
+
 ## Manual Verification
 
 Verified flow:
@@ -240,6 +284,8 @@ Verified flow:
 13. Return to the session suggestions and click `작게`.
 14. Confirm smaller suggestions are nested under the parent suggestion and do
     not duplicate.
+15. Open `/routines`, create a routine, pause/activate it, delete it, and refresh.
+16. Open `/settings`, edit nickname, and confirm the top-right profile updates.
 
 Latest manual/API verification result:
 
@@ -263,3 +309,4 @@ Use this checklist before a production-facing deploy:
 9. Check Settings and confirm backend AI status/usage loads without exposing any API key.
 10. Stop the API server and confirm the app shows ErrorState or EmptyState, not mock data.
 11. Check a 390px mobile viewport for `/today`, suggestions, active action, and settings.
+12. Stop the API server and confirm production mode shows no mock routine cards.
