@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { login, me } from "../api/auth";
+import { getApiErrorMessage } from "../api/errors";
 import { Button } from "../components/common/Button";
 import { Input } from "../components/common/Input";
 import { useAuthStore } from "../store/authStore";
@@ -24,8 +25,8 @@ export function LoginPage() {
       const user = await me();
       setUser(user);
       navigate("/today");
-    } catch {
-      setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
+    } catch (error) {
+      setError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }

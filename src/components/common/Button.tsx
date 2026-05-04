@@ -23,7 +23,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[13px] font-semibold transition ${variants[variant]} ${className}`}
+      className={`inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[13px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     >
       {icon}

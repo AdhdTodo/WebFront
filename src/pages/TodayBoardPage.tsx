@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
 import { createBrainDump } from "../api/brainDumps";
+import { getApiErrorMessage } from "../api/errors";
 import { createFeedback } from "../api/feedback";
-import { makeSmaller } from "../api/suggestions";
 import { ActiveActionPanel } from "../components/actions/ActiveActionPanel";
 import { BrainDumpComposer } from "../components/brainDump/BrainDumpComposer";
 import { Badge } from "../components/common/Badge";
@@ -11,18 +12,29 @@ import { Card } from "../components/common/Card";
 import { FeedbackPanel } from "../components/suggestions/FeedbackPanel";
 import { SuggestionBoard } from "../components/suggestions/SuggestionBoard";
 import { mockHistoryRows, mockSuggestions } from "../mockData";
+import { useAppStore } from "../store/appStore";
 import type { Action, Suggestion } from "../types/api";
 
 export function TodayBoardPage() {
-  const [sessionId, setSessionId] = useState<number | null>(null);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
-  const [activeAction, setActiveAction] = useState<Action | null>(null);
+  const navigate = useNavigate();
+  const currentSession = useAppStore((state) => state.currentSession);
+  const currentSuggestions = useAppStore((state) => state.currentSuggestions);
+  const activeAction = useAppStore((state) => state.activeAction);
+  const setCurrentSession = useAppStore((state) => state.setCurrentSession);
+  const setCurrentSuggestions = useAppStore((state) => state.setCurrentSuggestions);
+  const addSmallerSuggestions = useAppStore((state) => state.addSmallerSuggestions);
+  const setActiveAction = useAppStore((state) => state.setActiveAction);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  const [statusMessage, setStatusMessage] = useState("mock data loaded");
+  const [statusMessage, setStatusMessage] = useState(
+    currentSuggestions.length > 0
+      ? `session #${currentSession?.id} 후보를 복원했습니다.`
+      : "로그인 후 Brain Dump를 입력하면 실제 API로 후보를 생성합니다.",
+  );
   const [loading, setLoading] = useState(false);
+  const suggestions = currentSuggestions.length > 0 ? currentSuggestions : mockSuggestions;
 
   const metrics = [
-    ["Today suggestions", String(suggestions.length)],
+    ["Today suggestions", String(currentSuggestions.length)],
     ["Active actions", activeAction?.status === "active" ? "1" : "0"],
     ["Feedback signals", String(feedbackCount)],
     ["Mode", "No pressure"],
@@ -32,13 +44,15 @@ export function TodayBoardPage() {
     setLoading(true);
     setStatusMessage("백엔드에 Brain Dump를 보내는 중");
     try {
-      const response = await createBrainDump(rawText, sessionId ?? undefined);
-      setSessionId(response.session.id);
-      setSuggestions(response.suggestions);
+      const response = await createBrainDump(rawText, currentSession?.id);
+      setCurrentSession(response.session);
+      setCurrentSuggestions(response.suggestions);
       setActiveAction(null);
-      setStatusMessage(`session #${response.session.id}에서 후보 ${response.suggestions.length}개 생성`);
-    } catch {
-      setStatusMessage("API 호출에 실패했습니다. 로그인 상태와 백엔드 주소를 확인하세요.");
+      setStatusMessage(
+        `session #${response.session.id}에서 후보 ${response.suggestions.length}개 생성`,
+      );
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -47,8 +61,12 @@ export function TodayBoardPage() {
   async function handleDo(suggestion: Suggestion) {
     try {
       const response = await createFeedback(suggestion.session_id, suggestion.id, "do");
+      if (!response.action_id) {
+        setStatusMessage("Action ID가 응답에 없습니다. feedback do 흐름을 확인하세요.");
+        return;
+      }
       setFeedbackCount((count) => count + 1);
-      setActiveAction({
+      const nextAction: Action = {
         id: response.action_id ?? Date.now(),
         session_id: suggestion.session_id,
         suggestion_id: suggestion.id,
@@ -59,20 +77,28 @@ export function TodayBoardPage() {
         abort_reason: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      });
+      };
+      setActiveAction(nextAction);
       setStatusMessage("Feedback do 저장. Action이 생성되었습니다.");
-    } catch {
-      setStatusMessage("선택 처리에 실패했습니다. 이미 Action이 있거나 인증이 필요할 수 있습니다.");
+      navigate("/actions/active");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     }
   }
 
   async function handleMakeSmaller(suggestion: Suggestion) {
     try {
-      const smaller = await makeSmaller(suggestion.id);
-      setSuggestions((current) => [...smaller, ...current]);
+      const response = await createFeedback(
+        suggestion.session_id,
+        suggestion.id,
+        "make_smaller",
+      );
+      const smaller = response.smaller_suggestions;
+      addSmallerSuggestions(smaller);
+      setFeedbackCount((count) => count + 1);
       setStatusMessage(`더 작은 후보 ${smaller.length}개가 추가되었습니다.`);
-    } catch {
-      setStatusMessage("make_smaller 호출에 실패했습니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     }
   }
 
@@ -81,8 +107,8 @@ export function TodayBoardPage() {
       await createFeedback(suggestion.session_id, suggestion.id, "pass");
       setFeedbackCount((count) => count + 1);
       setStatusMessage("pass 신호를 저장했습니다.");
-    } catch {
-      setStatusMessage("pass 저장에 실패했습니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     }
   }
 
@@ -92,8 +118,8 @@ export function TodayBoardPage() {
       const updated = await completeAction(activeAction.id, "completed from web");
       setActiveAction(updated);
       setStatusMessage("Action을 completed로 저장했습니다.");
-    } catch {
-      setStatusMessage("완료 저장에 실패했습니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     }
   }
 
@@ -103,8 +129,8 @@ export function TodayBoardPage() {
       const updated = await abortAction(activeAction.id, "too large right now");
       setActiveAction(updated);
       setStatusMessage("Action을 aborted로 저장했습니다. 실패 기록이 아니라 조절 신호입니다.");
-    } catch {
-      setStatusMessage("중단 저장에 실패했습니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
     }
   }
 
@@ -125,6 +151,13 @@ export function TodayBoardPage() {
         </div>
       </Card>
       <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
+      {currentSuggestions.length === 0 && (
+        <Card className="p-3">
+          <p className="text-[13px] text-textSecondary">
+            아직 실제 API로 생성된 suggestion이 없습니다. 아래 카드는 화면 구조 확인용 예시입니다.
+          </p>
+        </Card>
+      )}
       <div className="grid grid-cols-3 gap-5">
         <SuggestionBoard
           suggestions={suggestions}

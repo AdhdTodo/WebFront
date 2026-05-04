@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { login, me, register } from "../api/auth";
+import { getApiErrorMessage } from "../api/errors";
 import { Button } from "../components/common/Button";
 import { Input } from "../components/common/Input";
 import { useAuthStore } from "../store/authStore";
@@ -29,8 +30,8 @@ export function RegisterPage() {
       const user = await me();
       setUser(user);
       navigate("/today");
-    } catch {
-      setError("회원가입에 실패했습니다. 이메일 또는 비밀번호 정책을 확인하세요.");
+    } catch (error) {
+      setError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }

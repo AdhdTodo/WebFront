@@ -38,7 +38,12 @@ export function ActiveActionPanel({
         저장됩니다.
       </div>
       <div className="mt-4">
-        <ActionControls onComplete={onComplete} onAbort={onAbort} onMakeSmaller={onMakeSmaller} />
+        <ActionControls
+          onComplete={onComplete}
+          onAbort={onAbort}
+          onMakeSmaller={onMakeSmaller}
+          disabled={action.status !== "active"}
+        />
       </div>
     </Card>
   );

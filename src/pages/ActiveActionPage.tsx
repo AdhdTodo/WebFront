@@ -1,23 +1,79 @@
+import { useState } from "react";
+
+import { abortAction, completeAction } from "../api/actions";
+import { getApiErrorMessage } from "../api/errors";
 import { ActiveActionPanel } from "../components/actions/ActiveActionPanel";
 import { Button } from "../components/common/Button";
 import { Card } from "../components/common/Card";
 import { Input } from "../components/common/Input";
-import { mockActiveAction, mockSmallerSuggestions } from "../mockData";
+import { mockSmallerSuggestions } from "../mockData";
+import { useAppStore } from "../store/appStore";
 
 export function ActiveActionPage() {
+  const activeAction = useAppStore((state) => state.activeAction);
+  const smallerSuggestions = useAppStore((state) => state.smallerSuggestions);
+  const setActiveAction = useAppStore((state) => state.setActiveAction);
+  const [abortReason, setAbortReason] = useState("");
+  const [statusMessage, setStatusMessage] = useState("선택된 Action 흐름을 확인합니다.");
+  const relatedSmaller =
+    smallerSuggestions.length > 0 ? smallerSuggestions : mockSmallerSuggestions;
+
+  async function handleComplete() {
+    if (!activeAction || activeAction.status !== "active") return;
+
+    try {
+      const updated = await completeAction(activeAction.id, "completed from focus view");
+      setActiveAction(updated);
+      setStatusMessage("완료 신호를 저장했습니다. History에서 최근 흐름으로 확인할 수 있습니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
+    }
+  }
+
+  async function handleAbort(reason = abortReason) {
+    if (!activeAction || activeAction.status !== "active") return;
+
+    try {
+      const updated = await abortAction(activeAction.id, reason || undefined);
+      setActiveAction(updated);
+      setStatusMessage("중단 기록을 저장했습니다. 실패가 아니라 다음 제안 조절 신호입니다.");
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
+    }
+  }
+
   return (
     <div className="grid grid-cols-[1fr_360px] gap-5">
       <div className="space-y-5">
-        <ActiveActionPanel />
+        <Card className="p-3">
+          <div className="flex items-center justify-between text-[12px]">
+            <span className="font-semibold text-textSecondary">action status</span>
+            <span className="text-textMuted">{statusMessage}</span>
+          </div>
+        </Card>
+        <ActiveActionPanel
+          action={activeAction}
+          onComplete={handleComplete}
+          onAbort={() => handleAbort()}
+        />
         <Card title="Abort reason" meta="선택 사항입니다. 다음 제안 크기를 줄이는 내부 신호로만 저장됩니다.">
-          <Input placeholder="지금은 너무 크게 느껴짐" />
-          <Button className="mt-3" variant="secondary">
+          <Input
+            placeholder="지금은 너무 크게 느껴짐"
+            value={abortReason}
+            onChange={(event) => setAbortReason(event.target.value)}
+          />
+          <Button
+            className="mt-3"
+            variant="secondary"
+            disabled={!activeAction || activeAction.status !== "active"}
+            onClick={() => handleAbort()}
+          >
             save reason
           </Button>
         </Card>
         <Card title="Related smaller actions" meta="원한다면 더 작은 단위에서 다시 시작할 수 있습니다.">
           <div className="grid grid-cols-3 gap-3">
-            {mockSmallerSuggestions.map((suggestion) => (
+            {relatedSmaller.map((suggestion) => (
               <div key={suggestion.id} className="border border-border bg-input p-3">
                 <div className="text-[13px] font-bold">{suggestion.title}</div>
                 <p className="mt-1 text-[12px] leading-5 text-textSecondary">
@@ -30,9 +86,12 @@ export function ActiveActionPage() {
       </div>
       <Card title="Action detail" meta="Action은 선택 이후 하나로 수렴합니다.">
         <div className="space-y-3 text-[13px] text-textSecondary">
-          <Row label="status" value={mockActiveAction.status} />
-          <Row label="session id" value={`#${mockActiveAction.session_id}`} />
-          <Row label="suggestion id" value={`#${mockActiveAction.suggestion_id}`} />
+          <Row label="status" value={activeAction?.status ?? "no active action"} />
+          <Row label="session id" value={activeAction ? `#${activeAction.session_id}` : "-"} />
+          <Row
+            label="suggestion id"
+            value={activeAction?.suggestion_id ? `#${activeAction.suggestion_id}` : "-"}
+          />
           <Row label="estimated time" value="2-5 min" />
         </div>
         <div className="mt-5 space-y-2 border-l-2 border-primary pl-3 text-[12px] text-textSecondary">
