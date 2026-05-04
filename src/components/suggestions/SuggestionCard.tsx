@@ -45,7 +45,7 @@ export function SuggestionCard({
             작게
           </Button>
           <Button variant="ghost" icon={<MinusCircle size={14} />} onClick={() => onPass?.(suggestion)}>
-            pass
+            이번엔 넘기기
           </Button>
         </div>
       )}

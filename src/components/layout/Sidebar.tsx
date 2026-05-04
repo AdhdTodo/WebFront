@@ -37,18 +37,18 @@ const groups = [
 
 export function Sidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 flex w-[244px] flex-col border-r border-border bg-sidebar">
-      <div className="border-b border-border px-5 py-5">
+    <aside className="border-b border-border bg-sidebar lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[244px] lg:flex-col lg:border-b-0 lg:border-r">
+      <div className="border-b border-border px-4 py-4 lg:px-5 lg:py-5">
         <div className="text-[19px] font-bold tracking-tight text-textPrimary">Decide</div>
         <div className="mt-1 text-[12px] font-medium text-textSecondary">ADHD Todo System</div>
       </div>
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+      <nav className="flex gap-3 overflow-x-auto px-3 py-3 lg:block lg:flex-1 lg:overflow-y-auto lg:py-4">
         {groups.map((group) => (
-          <div key={group.label} className="mb-6">
+          <div key={group.label} className="min-w-max lg:mb-6">
             <div className="mb-2 px-2 text-[11px] font-bold tracking-[0.08em] text-textMuted">
               {group.label}
             </div>
-            <div className="space-y-1">
+            <div className="flex gap-1 lg:block lg:space-y-1">
               {group.items.map((item) => (
                 <NavLink
                   key={`${group.label}-${item.label}`}
@@ -69,7 +69,7 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
-      <div className="border-t border-border p-4">
+      <div className="hidden border-t border-border p-4 lg:block">
         <div className="rounded-card border border-border bg-surface p-3">
           <div className="flex items-center gap-2 text-[12px] font-bold text-primary">
             <Settings size={14} />

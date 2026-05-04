@@ -30,12 +30,13 @@ export function ActiveActionPanel({
 
   return (
     <Card title="Active Action" meta="선택된 suggestion이 하나의 실행 단위로 수렴했습니다.">
-      <Badge tone={action.status === "active" ? "active" : "green"}>{action.status}</Badge>
+      <Badge tone={action.status === "active" ? "active" : "green"}>
+        {translateActionStatus(action.status)}
+      </Badge>
       <h2 className="mt-4 text-[20px] font-bold text-textPrimary">{action.title}</h2>
       <p className="mt-2 text-[14px] leading-6 text-textSecondary">{action.micro_step}</p>
       <div className="mt-4 rounded-card border border-border bg-input p-3 text-[12px] leading-5 text-textSecondary">
-        중단해도 실패가 아닙니다. abort reason은 다음 제안 크기를 줄이는 내부 신호로만
-        저장됩니다.
+        중단은 실패가 아니라 다음 제안을 더 작게 만들기 위한 신호입니다.
       </div>
       <div className="mt-4">
         <ActionControls
@@ -47,4 +48,10 @@ export function ActiveActionPanel({
       </div>
     </Card>
   );
+}
+
+function translateActionStatus(status: Action["status"]) {
+  if (status === "completed") return "완료됨";
+  if (status === "aborted") return "중단 기록됨";
+  return "실행 중";
 }

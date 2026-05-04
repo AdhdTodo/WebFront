@@ -24,7 +24,7 @@ export function HistoryTable({ brainDumps = [], actions = [], feedback = [] }: H
     ]),
     ...feedback.map((item) => [
       "Feedback",
-      item.reaction,
+      translateReaction(item.reaction),
       formatDate(item.created_at),
       item.action_id ? `action #${item.action_id}` : "반응 신호",
     ]),
@@ -67,6 +67,15 @@ function translateStatus(status: string) {
   if (status === "completed") return "완료됨";
   if (status === "aborted") return "중단 기록됨";
   return status;
+}
+
+function translateReaction(reaction: string) {
+  if (reaction === "do") return "선택";
+  if (reaction === "make_smaller") return "더 작게";
+  if (reaction === "pass") return "이번엔 넘기기";
+  if (reaction === "snooze") return "나중에 보기";
+  if (reaction === "capture_only") return "기록만";
+  return reaction;
 }
 
 function formatDate(value: string) {

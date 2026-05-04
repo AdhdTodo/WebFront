@@ -16,7 +16,7 @@ const coverage = [
 
 export function SettingsPage() {
   return (
-    <div className="grid grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       <AiSettingsPanel />
       <AccountPanel />
       <CalendarImportPanel />

@@ -2,7 +2,13 @@ import { Badge } from "../common/Badge";
 import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 
-const reactions = ["do", "snooze", "pass", "capture", "make_smaller"];
+const reactions = [
+  ["선택", "green"],
+  ["나중에 보기", "muted"],
+  ["이번엔 넘기기", "muted"],
+  ["기록만", "muted"],
+  ["더 작게", "amber"],
+] as const;
 
 export function FeedbackPanel() {
   return (
@@ -11,9 +17,9 @@ export function FeedbackPanel() {
       meta="반응은 평가가 아니라 다음 제안을 조절하는 신호입니다."
     >
       <div className="flex flex-wrap gap-2">
-        {reactions.map((reaction) => (
-          <Badge key={reaction} tone={reaction === "do" ? "green" : "muted"}>
-            {reaction}
+        {reactions.map(([label, tone]) => (
+          <Badge key={label} tone={tone}>
+            {label}
           </Badge>
         ))}
       </div>

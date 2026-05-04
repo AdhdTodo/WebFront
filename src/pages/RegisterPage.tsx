@@ -39,7 +39,7 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-[460px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
+      <div className="w-full max-w-[460px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
         <div className="text-[24px] font-bold text-textPrimary">Create account</div>
         <p className="mt-2 text-[13px] leading-6 text-textSecondary">
           비밀번호는 8자 이상, 문자와 숫자를 포함해야 합니다.

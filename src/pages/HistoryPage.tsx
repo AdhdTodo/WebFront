@@ -29,7 +29,7 @@ export function HistoryPage() {
   const captureOnlyCount = feedback.filter((item) => item.reaction === "capture_only").length;
 
   return (
-    <div className="grid grid-cols-[1fr_340px] gap-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
       <div className="space-y-5">
         <Card className="p-3">
           <div className="flex items-center justify-between text-[12px]">
@@ -50,8 +50,8 @@ export function HistoryPage() {
         <HistoryTable brainDumps={brainDumps} actions={actions} feedback={feedback} />
       </div>
       <div className="space-y-5">
-        <Card title="Weekly summary" meta="성공률 대신 다시 돌아온 흐름을 봅니다.">
-          <div className="grid grid-cols-2 gap-3">
+        <Card title="Weekly summary" meta="기록은 성공률이 아니라 흐름을 확인하기 위한 용도입니다.">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {[
               ["Brain Dumps", String(brainDumps.length)],
               ["Actions returned", String(actions.length)],

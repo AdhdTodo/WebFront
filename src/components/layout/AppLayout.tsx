@@ -36,17 +36,27 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
 
 export function AppLayout() {
   const location = useLocation();
-  const meta = pageMeta[location.pathname] ?? pageMeta["/today"];
+  const meta = getPageMeta(location.pathname);
 
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className="ml-[244px] min-h-screen">
+      <div className="min-h-screen lg:ml-[244px]">
         <Topbar title={meta.title} subtitle={meta.subtitle} />
-        <main className="px-10 py-8">
+        <main className="px-4 py-5 md:px-6 lg:px-10 lg:py-8">
           <Outlet />
         </main>
       </div>
     </div>
   );
+}
+
+function getPageMeta(pathname: string) {
+  if (pathname.startsWith("/sessions/") && pathname.endsWith("/suggestions")) {
+    return pageMeta["/suggestions"];
+  }
+  if (pathname.startsWith("/actions/")) {
+    return pageMeta["/actions/active"];
+  }
+  return pageMeta[pathname] ?? pageMeta["/today"];
 }

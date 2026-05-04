@@ -43,7 +43,7 @@ export function BrainDumpPage() {
   }
 
   return (
-    <div className="grid grid-cols-[1fr_360px] gap-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-5">
         <Card className="p-3">
           <div className="flex items-center justify-between text-[12px]">

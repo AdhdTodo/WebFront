@@ -33,8 +33,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen grid-cols-[1.05fr_0.95fr] bg-background">
-      <section className="flex flex-col justify-between bg-navy p-12 text-white">
+    <div className="grid min-h-screen grid-cols-1 bg-background lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="flex flex-col justify-between bg-navy p-8 text-white lg:p-12">
         <div>
           <div className="text-[24px] font-bold">Decide</div>
           <div className="mt-1 text-[13px] text-white/60">ADHD Todo System</div>
@@ -47,7 +47,7 @@ export function LoginPage() {
             할 일 목록을 직접 관리하게 만들지 않습니다. Brain Dump를 입력하면 시스템이 여러
             개의 micro-action 후보로 나누고, 사용자는 하나를 선택합니다.
           </p>
-          <div className="mt-8 grid max-w-[620px] grid-cols-2 gap-3">
+          <div className="mt-8 grid max-w-[620px] grid-cols-1 gap-3 md:grid-cols-2">
             <div className="border border-white/15 bg-white/5 p-4">
               <div className="mb-2 text-[12px] text-white/50">Brain Dump</div>
               <p className="text-[13px] leading-6 text-white/80">
@@ -70,8 +70,8 @@ export function LoginPage() {
         </div>
       </section>
 
-      <section className="flex items-center justify-center p-12">
-        <div className="w-[420px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
+      <section className="flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-[420px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
           <h2 className="text-[26px] font-bold text-textPrimary">Login</h2>
           <p className="mt-2 text-[13px] leading-6 text-textSecondary">
             JWT access / refresh token, login protection, rate limiting이 적용됩니다.

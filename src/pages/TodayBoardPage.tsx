@@ -37,6 +37,9 @@ export function TodayBoardPage() {
   const [loading, setLoading] = useState(false);
   const suggestions =
     currentSuggestions.length > 0 ? currentSuggestions : env.useMocks ? mockSuggestions : [];
+  const visibleSuggestions = suggestions.filter(
+    (suggestion) => suggestion.generation_type !== "smaller",
+  );
 
   useEffect(() => {
     getHistory()
@@ -45,7 +48,7 @@ export function TodayBoardPage() {
   }, []);
 
   const metrics = [
-    ["Today suggestions", String(currentSuggestions.length)],
+    ["Today suggestions", String(visibleSuggestions.length)],
     ["Active actions", activeAction?.status === "active" ? "1" : "0"],
     ["Feedback signals", String(feedbackCount)],
     ["Mode", "No pressure"],
@@ -80,7 +83,7 @@ export function TodayBoardPage() {
       setFeedbackCount((count) => count + 1);
       const nextAction: Action = response.action;
       setActiveAction(nextAction);
-      setStatusMessage("Feedback do 저장. Action이 생성되었습니다.");
+      setStatusMessage("선택 신호를 저장했습니다. Action이 생성되었습니다.");
       navigate(`/actions/${nextAction.id}`);
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
@@ -107,7 +110,7 @@ export function TodayBoardPage() {
     try {
       await createFeedback(suggestion.session_id, suggestion.id, "pass");
       setFeedbackCount((count) => count + 1);
-      setStatusMessage("pass 신호를 저장했습니다.");
+      setStatusMessage("이번엔 넘기기 신호를 저장했습니다.");
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
@@ -118,7 +121,7 @@ export function TodayBoardPage() {
     try {
       const updated = await completeAction(activeAction.id, "completed from web");
       setActiveAction(updated);
-      setStatusMessage("Action을 completed로 저장했습니다.");
+      setStatusMessage("Action을 완료됨으로 저장했습니다.");
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
@@ -129,7 +132,7 @@ export function TodayBoardPage() {
     try {
       const updated = await abortAction(activeAction.id, "too large right now");
       setActiveAction(updated);
-      setStatusMessage("Action을 aborted로 저장했습니다. 실패 기록이 아니라 조절 신호입니다.");
+      setStatusMessage("Action을 중단 기록으로 저장했습니다. 다음 제안 조절 신호입니다.");
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
@@ -137,7 +140,7 @@ export function TodayBoardPage() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value]) => (
           <Card key={label} className="p-4">
             <div className="text-[12px] font-semibold text-textMuted">{label}</div>
@@ -152,9 +155,9 @@ export function TodayBoardPage() {
         </div>
       </Card>
       <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <SuggestionBoard
-          suggestions={suggestions}
+          suggestions={visibleSuggestions}
           onDo={handleDo}
           onMakeSmaller={handleMakeSmaller}
           onPass={handlePass}
@@ -168,8 +171,8 @@ export function TodayBoardPage() {
           <FeedbackPanel />
           <Card title="Review / Signals" meta="최근 흐름과 예정 모듈을 함께 봅니다.">
             <div className="mb-4 flex flex-wrap gap-2">
-              {["do", "pass", "snooze", "smaller"].map((signal) => (
-                <Badge key={signal} tone={signal === "do" ? "green" : "muted"}>
+              {["선택", "이번엔 넘기기", "나중에 보기", "더 작게"].map((signal) => (
+                <Badge key={signal} tone={signal === "선택" ? "green" : "muted"}>
                   {signal}
                 </Badge>
               ))}

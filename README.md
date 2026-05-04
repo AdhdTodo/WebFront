@@ -28,11 +28,16 @@ Create `.env` from `.env.example`.
 ```text
 VITE_API_BASE_URL=http://yangtheory.site:8001/api/v1
 VITE_USE_MOCKS=false
+VITE_AI_SUGGESTION_ENABLED=false
 ```
 
 `VITE_USE_MOCKS=false` is the default service mode. Mock data is only shown when
 `VITE_USE_MOCKS=true`, so API failures or empty API responses are not hidden by
 sample cards.
+
+`VITE_AI_SUGGESTION_ENABLED` is display-only for the web UI. The backend decides
+whether AI generation is enabled; the frontend shows the current expectation in
+Settings.
 
 ## Run
 
@@ -70,8 +75,11 @@ http://yangtheory.site:5173/today
 8. Suggestions are loaded by session URL, so refresh works.
 9. Clicking `선택` sends feedback `reaction=do`.
 10. The backend creates the Action and returns `action_id`.
-11. The app moves to `/actions/{actionId}` and allows complete or abort.
-12. `/history` reads `/me/history` and shows recent flow and reaction signals.
+11. The backend also returns the `action` object, which the app stores directly.
+12. The app moves to `/actions/{actionId}` and allows complete or abort.
+13. Direct `/actions/{actionId}` entry restores the Action with
+    `GET /actions/{actionId}`.
+14. `/history` reads `/me/history` and shows recent flow and reaction signals.
 
 ## Routes
 
@@ -114,25 +122,72 @@ mock data is real API data.
 
 ## Backend TODO
 
-The backend currently returns `action_id` from feedback `do`. The frontend is
-prepared for a future `FeedbackResponse.action` object and a future
-`GET /api/v1/actions/{action_id}` endpoint.
+The backend now supports `GET /api/v1/actions/{action_id}` and includes
+`action` in feedback `do` responses.
 
-Until that endpoint exists, direct `/actions/:actionId` entry is restored from
-`/me/history` when possible. If the action is not in recent history, the page
-shows an empty state instead of fake data.
+Current next items:
+
+- AI quality tuning after real OpenAI usage is enabled.
+- Mobile polish beyond the first responsive pass.
+- Calendar import as a one-time candidate ingestion flow.
+
+## Deployment Check
+
+Current local/domain preview:
+
+```text
+Frontend: http://yangtheory.site:5173
+Backend:  http://yangtheory.site:8001
+```
+
+Check backend health:
+
+```powershell
+curl http://yangtheory.site:8001/api/v1/health
+```
+
+Check frontend:
+
+```text
+http://yangtheory.site:5173/today
+```
+
+Make sure the frontend is built with:
+
+```powershell
+$env:VITE_API_BASE_URL='http://yangtheory.site:8001/api/v1'
+$env:VITE_USE_MOCKS='false'
+npm run build
+```
 
 ## Manual Verification
+
+Verified flow:
 
 1. Register or login.
 2. Go to `/today`.
 3. Enter a Brain Dump.
 4. Confirm navigation to `/sessions/{sessionId}/suggestions`.
-5. Confirm 2-5 suggestions are shown.
-6. Click `선택`.
-7. Confirm feedback `do` creates an Action and moves to `/actions/{actionId}`.
-8. Complete or abort the Action.
-9. Open `/history`.
-10. Confirm the recent flow and reaction signals are shown.
-11. Return to suggestions and click `작게`.
-12. Confirm smaller suggestions appear without duplicate cards.
+5. Confirm the Original Brain Dump is loaded from
+   `GET /sessions/{sessionId}/brain-dumps`.
+6. Confirm 2-5 suggestions are loaded from
+   `GET /sessions/{sessionId}/suggestions`.
+7. Click `선택`.
+8. Confirm feedback `reaction=do` creates an Action and returns the `action`
+   object.
+9. Confirm navigation to `/actions/{actionId}`.
+10. Refresh `/actions/{actionId}` and confirm it restores through
+    `GET /actions/{actionId}`.
+11. Complete or abort the Action and confirm the status changes to `완료됨` or
+    `중단 기록됨`.
+12. Open `/history` and confirm the recent flow appears.
+13. Return to the session suggestions and click `작게`.
+14. Confirm smaller suggestions are nested under the parent suggestion and do
+    not duplicate.
+
+Latest manual/API verification result:
+
+- Frontend `/today`: 200
+- Backend `/api/v1/health`: ok
+- Brain Dump -> session suggestions -> feedback do -> action detail: passed
+- make_smaller nested data path: passed

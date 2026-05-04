@@ -35,6 +35,9 @@ export function SuggestionsPage() {
     () => (currentSuggestions.length > 0 ? currentSuggestions : env.useMocks ? mockSuggestions : []),
     [currentSuggestions],
   );
+  const parentSuggestions = suggestions.filter(
+    (suggestion) => suggestion.generation_type !== "smaller",
+  );
   const smaller =
     smallerSuggestions.length > 0 ? smallerSuggestions : env.useMocks ? mockSmallerSuggestions : [];
   const originalBrainDump =
@@ -55,7 +58,8 @@ export function SuggestionsPage() {
       .then(([items, dumps]) => {
         setCurrentSuggestions(items);
         setBrainDumps([...dumps].sort((a, b) => b.id - a.id));
-        setStatusMessage(`session #${routeSessionId} 후보 ${items.length}개를 불러왔습니다.`);
+        const parentCount = items.filter((item) => item.generation_type !== "smaller").length;
+        setStatusMessage(`session #${routeSessionId} 후보 ${parentCount}개를 불러왔습니다.`);
       })
       .catch((error) => setStatusMessage(getApiErrorMessage(error)))
       .finally(() => setLoading(false));
@@ -79,6 +83,10 @@ export function SuggestionsPage() {
 
   async function handleMakeSmaller(suggestion: Suggestion) {
     try {
+      if (smallerByParent[suggestion.id]?.length > 0) {
+        setStatusMessage("이미 더 작은 후보가 표시되어 있습니다.");
+        return;
+      }
       const response = await createFeedback(
         suggestion.session_id,
         suggestion.id,
@@ -102,7 +110,7 @@ export function SuggestionsPage() {
   }
 
   return (
-    <div className="grid grid-cols-[1fr_340px] gap-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
       <div className="space-y-5">
         <Card title="Original Brain Dump" meta="원본 입력 요약">
           {originalBrainDump ? (
@@ -120,7 +128,7 @@ export function SuggestionsPage() {
             "quiet",
             "gentle",
             "neutral",
-            `${suggestions.length} candidates`,
+            `${parentSuggestions.length} candidates`,
             sessionId ? `session #${sessionId}` : "no session",
           ].map((item) => (
             <Badge key={item} tone={item === "quiet" ? "quiet" : "muted"}>
@@ -149,8 +157,8 @@ export function SuggestionsPage() {
             description="Brain Dump를 입력하면 여러 suggestion이 이 보드에 표시됩니다."
           />
         )}
-        <div className="grid grid-cols-3 gap-4">
-          {suggestions.map((suggestion) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          {parentSuggestions.map((suggestion) => (
             <div key={suggestion.id} className="space-y-2">
               <SuggestionCard
                 suggestion={suggestion}

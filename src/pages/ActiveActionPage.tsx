@@ -60,14 +60,14 @@ export function ActiveActionPage() {
     try {
       const updated = await abortAction(activeAction.id, reason || undefined);
       setActiveAction(updated);
-      setStatusMessage("중단 기록을 저장했습니다. 실패가 아니라 다음 제안 조절 신호입니다.");
+      setStatusMessage("중단 기록을 저장했습니다. 다음 제안을 더 작게 만들기 위한 신호입니다.");
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
   }
 
   return (
-    <div className="grid grid-cols-[1fr_360px] gap-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-5">
         <Card className="p-3">
           <div className="flex items-center justify-between text-[12px]">
@@ -81,7 +81,7 @@ export function ActiveActionPage() {
           onComplete={handleComplete}
           onAbort={() => handleAbort()}
         />
-        <Card title="Abort reason" meta="선택 사항입니다. 다음 제안 크기를 줄이는 내부 신호로만 저장됩니다.">
+        <Card title="중단 기록" meta="선택 사항입니다. 다음 제안 크기를 줄이는 내부 신호로만 저장됩니다.">
           <Input
             placeholder="지금은 너무 크게 느껴짐"
             value={abortReason}
@@ -93,7 +93,7 @@ export function ActiveActionPage() {
             disabled={!activeAction || activeAction.status !== "active"}
             onClick={() => handleAbort()}
           >
-            save reason
+            중단 기록 저장
           </Button>
         </Card>
         <Card title="Related smaller actions" meta="원한다면 더 작은 단위에서 다시 시작할 수 있습니다.">
@@ -103,7 +103,7 @@ export function ActiveActionPage() {
               description="Suggestion에서 작게 요청하면 관련 후보가 여기에 표시됩니다."
             />
           )}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {relatedSmaller.map((suggestion) => (
               <div key={suggestion.id} className="border border-border bg-input p-3">
                 <div className="text-[13px] font-bold">{suggestion.title}</div>

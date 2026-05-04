@@ -35,7 +35,7 @@ export function BrainDumpComposer({
         value={rawText}
         onChange={(event) => setRawText(event.target.value)}
         rows={compact ? 5 : 10}
-        placeholder="예: 발표 준비해야 하는데 자료도 정리해야 하고 교수님께 질문 메일도 보내야 하고..."
+        placeholder="정리하지 말고 지금 머릿속에 있는 걸 그대로 적어도 괜찮아요."
       />
       <div className="mt-3 flex items-center justify-between">
         <p className="text-[12px] text-textMuted">쉼표, 줄바꿈, 긴 문장 모두 그대로 두세요.</p>

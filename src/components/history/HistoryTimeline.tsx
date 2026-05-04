@@ -21,7 +21,7 @@ export function HistoryTimeline({ feedback = [] }: HistoryTimelineProps) {
           <div key={feedback.id} className="flex items-start justify-between border-b border-border pb-3">
             <div>
               <Badge tone={feedback.reaction === "do" ? "green" : "muted"}>
-                {feedback.reaction}
+                {translateReaction(feedback.reaction)}
               </Badge>
               <p className="mt-2 text-[13px] text-textSecondary">
                 {feedback.note ?? "반응만 저장됨"}
@@ -33,4 +33,13 @@ export function HistoryTimeline({ feedback = [] }: HistoryTimelineProps) {
       </div>
     </Card>
   );
+}
+
+function translateReaction(reaction: string) {
+  if (reaction === "do") return "선택";
+  if (reaction === "make_smaller") return "더 작게";
+  if (reaction === "pass") return "이번엔 넘기기";
+  if (reaction === "snooze") return "나중에 보기";
+  if (reaction === "capture_only") return "기록만";
+  return reaction;
 }
