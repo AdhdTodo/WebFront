@@ -70,6 +70,8 @@ http://yangtheory.site:5173/today
 ## API Flow
 
 1. Register or login.
+   New registration asks for a nickname, email, and password. The nickname is
+   shown in the top-right profile area.
 2. The app stores JWT access and refresh tokens in `localStorage`.
 3. On refresh, `users/me` restores the current user.
 4. If an API call returns 401, axios attempts `/auth/refresh`.
@@ -111,6 +113,21 @@ Core flow state lives in `src/store/appStore.ts`:
 
 The store persists to `localStorage` so page refreshes keep the current flow when
 possible. Session suggestions can also be restored from the URL.
+
+## Account Profile
+
+The top-right profile reads the authenticated user from `users/me`.
+
+Display name priority:
+
+1. `user.nickname`
+2. email prefix before `@`
+3. `사용자`
+
+Existing backend users may have `nickname: null`; in that case the UI safely
+falls back to the email prefix. Settings shows nickname/email from the same
+authenticated user object. Profile editing, account deletion, and password
+change are planned follow-up items.
 
 ## Error States
 
@@ -202,6 +219,8 @@ npm run build
 Verified flow:
 
 1. Register or login.
+   For a new account, enter a nickname and confirm it appears in the top-right
+   profile.
 2. Go to `/today`.
 3. Enter a Brain Dump.
 4. Confirm navigation to `/sessions/{sessionId}/suggestions`.

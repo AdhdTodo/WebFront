@@ -6,6 +6,7 @@ export type EffortLevel = "quiet" | "gentle" | "neutral" | "tiny" | "nano";
 export interface User {
   id: number;
   email: string;
+  nickname: string | null;
   created_at: string;
 }
 
