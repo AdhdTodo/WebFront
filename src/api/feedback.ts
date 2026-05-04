@@ -1,11 +1,5 @@
 import { apiClient } from "./client";
-import type { Feedback, Reaction, Suggestion } from "../types/api";
-
-export interface FeedbackResponse {
-  feedback: Feedback;
-  action_id: number | null;
-  smaller_suggestions: Suggestion[];
-}
+import type { FeedbackResponse, Reaction } from "../types/api";
 
 export async function createFeedback(
   sessionId: number,

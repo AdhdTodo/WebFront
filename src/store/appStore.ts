@@ -50,8 +50,12 @@ export const useAppStore = create<AppState>((set) => ({
   },
   addSmallerSuggestions: (suggestions) => {
     set((state) => {
-      const nextSmaller = [...suggestions, ...state.smallerSuggestions];
-      const nextSuggestions = [...suggestions, ...state.currentSuggestions];
+      const existingSmallerIds = new Set(state.smallerSuggestions.map((item) => item.id));
+      const existingSuggestionIds = new Set(state.currentSuggestions.map((item) => item.id));
+      const uniqueSmaller = suggestions.filter((item) => !existingSmallerIds.has(item.id));
+      const uniqueSuggestions = suggestions.filter((item) => !existingSuggestionIds.has(item.id));
+      const nextSmaller = [...uniqueSmaller, ...state.smallerSuggestions];
+      const nextSuggestions = [...uniqueSuggestions, ...state.currentSuggestions];
       localStorage.setItem(smallerKey, JSON.stringify(nextSmaller));
       localStorage.setItem(suggestionsKey, JSON.stringify(nextSuggestions));
       return {

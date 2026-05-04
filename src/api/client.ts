@@ -1,10 +1,11 @@
 import axios from "axios";
 
+import { env } from "../config/env";
 import { useAuthStore } from "../store/authStore";
 import type { AuthTokens } from "../types/api";
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8001/api/v1",
+  baseURL: env.apiBaseUrl,
   timeout: 12000,
 });
 

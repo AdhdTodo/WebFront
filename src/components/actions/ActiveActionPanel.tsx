@@ -1,7 +1,7 @@
-import { mockActiveAction } from "../../mockData";
 import type { Action } from "../../types/api";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
+import { EmptyState } from "../common/EmptyState";
 import { ActionControls } from "./ActionControls";
 
 interface ActiveActionPanelProps {
@@ -12,7 +12,7 @@ interface ActiveActionPanelProps {
 }
 
 export function ActiveActionPanel({
-  action = mockActiveAction,
+  action = null,
   onComplete,
   onAbort,
   onMakeSmaller,
@@ -20,10 +20,10 @@ export function ActiveActionPanel({
   if (!action) {
     return (
       <Card title="Active Action" meta="선택된 suggestion이 하나의 실행 단위로 수렴합니다.">
-        <div className="rounded-card border border-dashed border-border bg-input p-5 text-[13px] leading-6 text-textSecondary">
-          아직 선택된 Action이 없습니다. 왼쪽 suggestion 중 하나를 선택하면 여기에 집중 실행
-          단위가 표시됩니다.
-        </div>
+        <EmptyState
+          title="현재 실행 중인 행동이 없습니다."
+          description="suggestion 중 하나를 선택하면 여기에 집중 실행 단위가 표시됩니다."
+        />
       </Card>
     );
   }

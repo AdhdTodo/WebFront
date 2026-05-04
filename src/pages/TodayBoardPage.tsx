@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
 import { createBrainDump } from "../api/brainDumps";
 import { getApiErrorMessage } from "../api/errors";
 import { createFeedback } from "../api/feedback";
+import { getHistory } from "../api/history";
 import { ActiveActionPanel } from "../components/actions/ActiveActionPanel";
 import { BrainDumpComposer } from "../components/brainDump/BrainDumpComposer";
 import { Badge } from "../components/common/Badge";
 import { Card } from "../components/common/Card";
+import { EmptyState } from "../components/common/EmptyState";
+import { env } from "../config/env";
 import { FeedbackPanel } from "../components/suggestions/FeedbackPanel";
 import { SuggestionBoard } from "../components/suggestions/SuggestionBoard";
-import { mockHistoryRows, mockSuggestions } from "../mockData";
+import { mockSuggestions } from "../mockData";
 import { useAppStore } from "../store/appStore";
-import type { Action, Suggestion } from "../types/api";
+import type { Action, HistoryResponse, Suggestion } from "../types/api";
 
 export function TodayBoardPage() {
   const navigate = useNavigate();
@@ -30,8 +33,16 @@ export function TodayBoardPage() {
       ? `session #${currentSession?.id} 후보를 복원했습니다.`
       : "로그인 후 Brain Dump를 입력하면 실제 API로 후보를 생성합니다.",
   );
+  const [history, setHistory] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const suggestions = currentSuggestions.length > 0 ? currentSuggestions : mockSuggestions;
+  const suggestions =
+    currentSuggestions.length > 0 ? currentSuggestions : env.useMocks ? mockSuggestions : [];
+
+  useEffect(() => {
+    getHistory()
+      .then(setHistory)
+      .catch(() => setHistory(null));
+  }, []);
 
   const metrics = [
     ["Today suggestions", String(currentSuggestions.length)],
@@ -51,6 +62,7 @@ export function TodayBoardPage() {
       setStatusMessage(
         `session #${response.session.id}에서 후보 ${response.suggestions.length}개 생성`,
       );
+      navigate(`/sessions/${response.session.id}/suggestions`);
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     } finally {
@@ -61,13 +73,16 @@ export function TodayBoardPage() {
   async function handleDo(suggestion: Suggestion) {
     try {
       const response = await createFeedback(suggestion.session_id, suggestion.id, "do");
-      if (!response.action_id) {
+      const actionId = response.action?.id ?? response.action_id;
+      if (!actionId) {
         setStatusMessage("Action ID가 응답에 없습니다. feedback do 흐름을 확인하세요.");
         return;
       }
       setFeedbackCount((count) => count + 1);
-      const nextAction: Action = {
-        id: response.action_id ?? Date.now(),
+      const nextAction: Action = response.action ?? {
+        // TODO: replace this display shell when the backend exposes GET /actions/{action_id}
+        // or includes the full action object in FeedbackResponse.
+        id: actionId,
         session_id: suggestion.session_id,
         suggestion_id: suggestion.id,
         title: suggestion.title,
@@ -80,7 +95,7 @@ export function TodayBoardPage() {
       };
       setActiveAction(nextAction);
       setStatusMessage("Feedback do 저장. Action이 생성되었습니다.");
-      navigate("/actions/active");
+      navigate(`/actions/${actionId}`);
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
@@ -93,7 +108,7 @@ export function TodayBoardPage() {
         suggestion.id,
         "make_smaller",
       );
-      const smaller = response.smaller_suggestions;
+      const smaller = response.smaller_suggestions ?? [];
       addSmallerSuggestions(smaller);
       setFeedbackCount((count) => count + 1);
       setStatusMessage(`더 작은 후보 ${smaller.length}개가 추가되었습니다.`);
@@ -151,13 +166,6 @@ export function TodayBoardPage() {
         </div>
       </Card>
       <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
-      {currentSuggestions.length === 0 && (
-        <Card className="p-3">
-          <p className="text-[13px] text-textSecondary">
-            아직 실제 API로 생성된 suggestion이 없습니다. 아래 카드는 화면 구조 확인용 예시입니다.
-          </p>
-        </Card>
-      )}
       <div className="grid grid-cols-3 gap-5">
         <SuggestionBoard
           suggestions={suggestions}
@@ -181,10 +189,16 @@ export function TodayBoardPage() {
               ))}
             </div>
             <div className="space-y-2">
-              {mockHistoryRows.slice(0, 3).map((row) => (
-                <div key={row.join("-")} className="flex justify-between text-[12px]">
-                  <span className="text-textSecondary">{row[0]}</span>
-                  <span className="text-textMuted">{row[2]}</span>
+              {!history && (
+                <EmptyState
+                  title="아직 최근 흐름이 없습니다."
+                  description="Action이나 reaction이 저장되면 이곳에 표시됩니다."
+                />
+              )}
+              {history?.actions.slice(0, 3).map((action) => (
+                <div key={action.id} className="flex justify-between text-[12px]">
+                  <span className="text-textSecondary">{action.title}</span>
+                  <span className="text-textMuted">{action.status}</span>
                 </div>
               ))}
             </div>

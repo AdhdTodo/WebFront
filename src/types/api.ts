@@ -1,4 +1,5 @@
-export type Reaction = "do" | "snooze" | "pass" | "make_smaller" | "capture_only";
+export type FeedbackReaction = "do" | "snooze" | "pass" | "make_smaller" | "capture_only";
+export type Reaction = FeedbackReaction;
 export type ActionStatus = "active" | "completed" | "aborted";
 export type EffortLevel = "quiet" | "gentle" | "neutral" | "tiny" | "nano";
 
@@ -68,4 +69,11 @@ export interface HistoryResponse {
   brain_dumps: BrainDump[];
   actions: Action[];
   feedback: Feedback[];
+}
+
+export interface FeedbackResponse {
+  feedback: Feedback;
+  action_id?: number | null;
+  action?: Action | null;
+  smaller_suggestions?: Suggestion[];
 }

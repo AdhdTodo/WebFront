@@ -1,22 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
 import { getApiErrorMessage } from "../api/errors";
+import { getHistory } from "../api/history";
 import { ActiveActionPanel } from "../components/actions/ActiveActionPanel";
 import { Button } from "../components/common/Button";
 import { Card } from "../components/common/Card";
+import { EmptyState } from "../components/common/EmptyState";
 import { Input } from "../components/common/Input";
+import { LoadingState } from "../components/common/LoadingState";
+import { env } from "../config/env";
 import { mockSmallerSuggestions } from "../mockData";
 import { useAppStore } from "../store/appStore";
 
 export function ActiveActionPage() {
+  const params = useParams();
+  const routeActionId = params.actionId ? Number(params.actionId) : null;
   const activeAction = useAppStore((state) => state.activeAction);
   const smallerSuggestions = useAppStore((state) => state.smallerSuggestions);
   const setActiveAction = useAppStore((state) => state.setActiveAction);
   const [abortReason, setAbortReason] = useState("");
   const [statusMessage, setStatusMessage] = useState("선택된 Action 흐름을 확인합니다.");
+  const [loading, setLoading] = useState(false);
   const relatedSmaller =
-    smallerSuggestions.length > 0 ? smallerSuggestions : mockSmallerSuggestions;
+    smallerSuggestions.length > 0
+      ? smallerSuggestions
+      : env.useMocks
+        ? mockSmallerSuggestions
+        : [];
+
+  useEffect(() => {
+    if (!routeActionId || activeAction?.id === routeActionId) return;
+
+    setLoading(true);
+    getHistory()
+      .then((history) => {
+        const matchedAction = history.actions.find((action) => action.id === routeActionId);
+        if (matchedAction) {
+          setActiveAction(matchedAction);
+          setStatusMessage(`action #${routeActionId}를 최근 흐름에서 복원했습니다.`);
+          return;
+        }
+        setStatusMessage(
+          "Action 상세 API가 아직 없어 최근 흐름에서 찾지 못한 action은 복원할 수 없습니다.",
+        );
+      })
+      .catch((error) => setStatusMessage(getApiErrorMessage(error)))
+      .finally(() => setLoading(false));
+  }, [activeAction?.id, routeActionId, setActiveAction]);
 
   async function handleComplete() {
     if (!activeAction || activeAction.status !== "active") return;
@@ -51,6 +83,7 @@ export function ActiveActionPage() {
             <span className="text-textMuted">{statusMessage}</span>
           </div>
         </Card>
+        {loading && <LoadingState message="Action을 복원하는 중입니다." />}
         <ActiveActionPanel
           action={activeAction}
           onComplete={handleComplete}
@@ -72,6 +105,12 @@ export function ActiveActionPage() {
           </Button>
         </Card>
         <Card title="Related smaller actions" meta="원한다면 더 작은 단위에서 다시 시작할 수 있습니다.">
+          {relatedSmaller.length === 0 && (
+            <EmptyState
+              title="연결된 더 작은 후보가 없습니다."
+              description="Suggestion에서 작게 요청하면 관련 후보가 여기에 표시됩니다."
+            />
+          )}
           <div className="grid grid-cols-3 gap-3">
             {relatedSmaller.map((suggestion) => (
               <div key={suggestion.id} className="border border-border bg-input p-3">
