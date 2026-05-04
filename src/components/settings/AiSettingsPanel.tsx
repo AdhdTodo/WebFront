@@ -14,6 +14,7 @@ export function AiSettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const aiStatus = (status?.enabled ?? env.aiSuggestionEnabled) ? "enabled" : "off";
+  const fallbackReasons = Object.entries(usage?.fallbackReasons ?? {});
 
   useEffect(() => {
     Promise.all([getAIStatus(), getMyAIUsage()])
@@ -28,42 +29,76 @@ export function AiSettingsPanel() {
   return (
     <Card title="AI settings" meta="AI는 선택 사항이며 실패 시 rule-based fallback으로 전환됩니다.">
       {loading && <LoadingState message="AI 상태를 백엔드에서 불러오는 중입니다." />}
-      {error && (
-        <EmptyState
-          title="AI 상태를 불러오지 못했습니다."
-          description={`${error} 기본 제안기로 계속 진행할 수 있습니다.`}
-        />
-      )}
-      <div className="grid grid-cols-1 gap-3 text-[13px] sm:grid-cols-2">
-        <div className="rounded-card border border-border bg-input p-3">
-          <div className="text-textMuted">AI Suggestion</div>
-          <div className="mt-2 flex items-center justify-between">
-            <strong>{aiStatus}</strong>
-            <Badge tone={status?.enabled ? "green" : "muted"}>optional</Badge>
+      {!loading && error && (
+        <div className="space-y-3">
+          <EmptyState
+            title="AI 상태를 불러오지 못했습니다."
+            description={`${error} 앱은 기본 제안기로 계속 사용할 수 있습니다.`}
+          />
+          <div className="grid grid-cols-1 gap-3 text-[13px] sm:grid-cols-2">
+            <Metric
+              label="frontend config hint"
+              value={env.aiSuggestionEnabled ? "enabled" : "off"}
+            />
+            <Metric label="model hint" value={env.aiModel} />
           </div>
         </div>
-        <div className="rounded-card border border-border bg-input p-3">
-          <div className="text-textMuted">model</div>
-          <strong className="mt-2 block">{status?.model ?? env.aiModel}</strong>
+      )}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 gap-3 text-[13px] sm:grid-cols-2">
+          <div className="rounded-card border border-border bg-input p-3">
+            <div className="text-textMuted">AI Suggestion</div>
+            <div className="mt-2 flex items-center justify-between">
+              <strong>{aiStatus}</strong>
+              <Badge tone={status?.enabled ? "green" : "muted"}>optional</Badge>
+            </div>
+          </div>
+          <div className="rounded-card border border-border bg-input p-3">
+            <div className="text-textMuted">model</div>
+            <strong className="mt-2 block">{status?.model ?? env.aiModel}</strong>
+          </div>
+          <div className="rounded-card border border-border bg-input p-3">
+            <div className="text-textMuted">JSON schema</div>
+            <strong className="mt-2 block">
+              {status?.structuredOutput ? "ready" : "unknown"}
+            </strong>
+          </div>
+          <div className="rounded-card border border-border bg-input p-3">
+            <div className="text-textMuted">fallback</div>
+            <strong className="mt-2 block">{status?.fallback ?? "rule_based"}</strong>
+          </div>
         </div>
-        <div className="rounded-card border border-border bg-input p-3">
-          <div className="text-textMuted">JSON schema</div>
-          <strong className="mt-2 block">{status?.structuredOutput ? "ready" : "unknown"}</strong>
-        </div>
-        <div className="rounded-card border border-border bg-input p-3">
-          <div className="text-textMuted">fallback</div>
-          <strong className="mt-2 block">{status?.fallback ?? "rule_based"}</strong>
-        </div>
-      </div>
-      {usage && (
+      )}
+      {!loading && !error && usage && (
         <div className="mt-4 grid grid-cols-1 gap-2 text-[12px] sm:grid-cols-2">
-          <Metric label="today calls" value={String(usage.todayCalls)} />
-          <Metric label="today estimated cost" value={`$${usage.todayEstimatedCost.toFixed(6)}`} />
+          <Metric label="recent 24h actual calls" value={String(usage.todayCalls)} />
           <Metric
-            label="monthly estimated cost"
+            label="recent 24h estimated cost"
+            value={`$${usage.todayEstimatedCost.toFixed(6)}`}
+          />
+          <Metric
+            label="recent 30d estimated cost"
             value={`$${usage.monthlyEstimatedCost.toFixed(6)}`}
           />
-          <Metric label="cache hits / fallback" value={`${usage.cacheHits} / ${usage.fallbackCount}`} />
+          <Metric
+            label="cache hits / fallback"
+            value={`${usage.cacheHits} / ${usage.fallbackCount}`}
+          />
+        </div>
+      )}
+      {!loading && !error && fallbackReasons.length > 0 && (
+        <div className="mt-3 border border-border bg-input p-3 text-[12px]">
+          <div className="mb-2 font-semibold text-textSecondary">fallback signals</div>
+          <div className="flex flex-wrap gap-2">
+            {fallbackReasons.map(([reason, count]) => (
+              <span
+                key={reason}
+                className="border border-border bg-surface px-2 py-1 text-textMuted"
+              >
+                {reason}: {count}
+              </span>
+            ))}
+          </div>
         </div>
       )}
       <p className="mt-4 text-[12px] leading-5 text-textSecondary">

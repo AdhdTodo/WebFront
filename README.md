@@ -147,11 +147,15 @@ Settings displays:
 - Model
 - JSON schema readiness
 - Rule-based fallback
-- Today calls and estimated usage cost
+- Recent 24h actual OpenAI calls and estimated usage cost
+- Recent 30d estimated usage cost
 - Cache hits and fallback count
+- Fallback signals by safe error code
 
 `OPENAI_API_KEY` must never be added to the frontend `.env`. The backend owns AI
 calls, rate limits, cache, budget guardrails, and fallback behavior.
+If the backend AI status API fails, Settings shows only frontend config hints and
+hides usage metrics so the screen is not mistaken for real backend state.
 
 ## Backend TODO
 

@@ -17,6 +17,7 @@ export interface AIUsageMe {
   monthlyEstimatedCost: number;
   cacheHits: number;
   fallbackCount: number;
+  fallbackReasons: Record<string, number>;
   lastUsedAt: string | null;
 }
 
