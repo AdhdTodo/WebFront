@@ -36,9 +36,9 @@ VITE_AI_MODEL=gpt-4.1-mini
 `VITE_USE_MOCKS=true`, so API failures or empty API responses are not hidden by
 sample cards.
 
-`VITE_AI_SUGGESTION_ENABLED` is display-only for the web UI. The backend decides
-whether AI generation is enabled; the frontend shows the current expectation in
-Settings.
+`VITE_AI_SUGGESTION_ENABLED` is a display fallback only. Settings first calls the
+backend AI status and usage APIs, then falls back to this value if the backend is
+unavailable.
 
 The frontend never receives or stores `OPENAI_API_KEY`. React calls only the
 FastAPI backend, and the backend decides whether to use AI or rule-based
@@ -125,6 +125,34 @@ Shared API messages are handled in `src/api/errors.ts`.
 Core pages include loading, empty, and error states so the UI does not pretend
 mock data is real API data.
 
+Production mock policy:
+
+- `VITE_USE_MOCKS=false` is the default.
+- Production builds do not use mock fallback to hide API failures.
+- If the API is unavailable, pages show loading, empty, or error states.
+- Development samples are only visible when `VITE_USE_MOCKS=true`.
+
+## AI Status
+
+The frontend does not call OpenAI. It reads backend-only AI operation state:
+
+```http
+GET /api/v1/ai/status
+GET /api/v1/ai/usage/me
+```
+
+Settings displays:
+
+- AI Suggestion: off / enabled
+- Model
+- JSON schema readiness
+- Rule-based fallback
+- Today calls and estimated usage cost
+- Cache hits and fallback count
+
+`OPENAI_API_KEY` must never be added to the frontend `.env`. The backend owns AI
+calls, rate limits, cache, budget guardrails, and fallback behavior.
+
 ## Backend TODO
 
 The backend now supports `GET /api/v1/actions/{action_id}` and includes
@@ -132,7 +160,7 @@ The backend now supports `GET /api/v1/actions/{action_id}` and includes
 
 Current next items:
 
-- AI prompt quality tuning after real OpenAI usage is enabled.
+- AI prompt quality tuning after repeated real use.
 - Mobile polish beyond the first responsive pass.
 - Calendar import as a one-time candidate ingestion flow.
 
@@ -196,3 +224,19 @@ Latest manual/API verification result:
 - Backend `/api/v1/health`: ok
 - Brain Dump -> session suggestions -> feedback do -> action detail: passed
 - make_smaller nested data path: passed
+
+## Repeated Flow Verification
+
+Use this checklist before a production-facing deploy:
+
+1. Register or login.
+2. Create three Brain Dumps in a row and confirm sessions do not mix.
+3. Refresh `/sessions/{sessionId}/suggestions` and confirm suggestions restore.
+4. Click `작게` more than once and confirm nested smaller suggestions do not duplicate.
+5. Select a suggestion and confirm navigation to `/actions/{actionId}`.
+6. Refresh `/actions/{actionId}` and confirm the Action restores.
+7. Complete or record an abort and confirm buttons no longer allow another state change.
+8. Open `/history` and confirm recent flow appears without pressure language.
+9. Check Settings and confirm backend AI status/usage loads without exposing any API key.
+10. Stop the API server and confirm the app shows ErrorState or EmptyState, not mock data.
+11. Check a 390px mobile viewport for `/today`, suggestions, active action, and settings.
