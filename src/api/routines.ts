@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import type { Action } from "../types/api";
 
 export interface Routine {
   id: number;
@@ -35,4 +36,9 @@ export async function updateRoutine(id: number, payload: Partial<RoutineInput>) 
 
 export async function deleteRoutine(id: number) {
   await apiClient.delete(`/routines/${id}`);
+}
+
+export async function startRoutineAction(id: number) {
+  const response = await apiClient.post<Action>(`/routines/${id}/start-action`);
+  return response.data;
 }

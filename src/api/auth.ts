@@ -27,3 +27,11 @@ export async function updateMe(nickname: string) {
   const response = await apiClient.patch<User>("/users/me", { nickname });
   return response.data;
 }
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const response = await apiClient.patch<{ message: string }>("/users/me/password", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
+  return response.data;
+}

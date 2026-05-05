@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   createRoutine,
   deleteRoutine,
   listRoutines,
+  startRoutineAction,
   updateRoutine,
   type Routine,
 } from "../api/routines";
@@ -14,8 +16,11 @@ import { EmptyState } from "../components/common/EmptyState";
 import { Input } from "../components/common/Input";
 import { LoadingState } from "../components/common/LoadingState";
 import { RoutineList } from "../components/routines/RoutineList";
+import { useAppStore } from "../store/appStore";
 
 export function RoutinesPage() {
+  const navigate = useNavigate();
+  const setActiveAction = useAppStore((state) => state.setActiveAction);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [title, setTitle] = useState("");
   const [microStep, setMicroStep] = useState("");
@@ -57,13 +62,41 @@ export function RoutinesPage() {
   }
 
   async function handleToggle(routine: Routine) {
-    const updated = await updateRoutine(routine.id, { is_active: !routine.is_active });
-    setRoutines((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+    try {
+      setError(null);
+      const updated = await updateRoutine(routine.id, { is_active: !routine.is_active });
+      setRoutines((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    }
   }
 
   async function handleDelete(routine: Routine) {
-    await deleteRoutine(routine.id);
-    setRoutines((items) => items.filter((item) => item.id !== routine.id));
+    try {
+      setError(null);
+      await deleteRoutine(routine.id);
+      setRoutines((items) => items.filter((item) => item.id !== routine.id));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    }
+  }
+
+  async function handleStart(routine: Routine) {
+    if (!routine.is_active) {
+      setError("숨겨둔 루틴은 다시 사용으로 바꾼 뒤 시작할 수 있습니다.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const action = await startRoutineAction(routine.id);
+      setActiveAction(action);
+      navigate(`/actions/${action.id}`);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -97,7 +130,7 @@ export function RoutinesPage() {
             <option value="neutral">neutral</option>
           </select>
           <Button variant="primary" disabled={saving} onClick={handleCreate}>
-            add
+            추가
           </Button>
         </div>
         {error && <p className="mt-3 text-[12px] text-redMuted">{error}</p>}
@@ -107,7 +140,12 @@ export function RoutinesPage() {
         <EmptyState title="루틴을 불러오지 못했습니다." description={error} />
       )}
       {!loading && (
-        <RoutineList routines={routines} onToggle={handleToggle} onDelete={handleDelete} />
+        <RoutineList
+          routines={routines}
+          onStart={handleStart}
+          onToggle={handleToggle}
+          onDelete={handleDelete}
+        />
       )}
       <Card title="Routine pool settings" meta="fallback 후보 풀의 상태입니다.">
         <table className="w-full text-left text-[13px]">

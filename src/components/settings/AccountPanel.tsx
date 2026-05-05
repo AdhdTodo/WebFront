@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { updateMe } from "../../api/auth";
+import { changePassword, updateMe } from "../../api/auth";
 import { getApiErrorMessage } from "../../api/errors";
 import { useAppStore } from "../../store/appStore";
 import { useAuthStore } from "../../store/authStore";
@@ -19,6 +19,11 @@ export function AccountPanel() {
   const [nickname, setNickname] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setNickname(displayName);
@@ -46,6 +51,35 @@ export function AccountPanel() {
       setMessage(getApiErrorMessage(error));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (!currentPassword.trim()) {
+      setPasswordMessage("현재 비밀번호를 입력해주세요.");
+      return;
+    }
+    if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      setPasswordMessage("새 비밀번호는 8자 이상이며 문자와 숫자를 포함해야 합니다.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage("새 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+
+    setPasswordSaving(true);
+    setPasswordMessage(null);
+    try {
+      const response = await changePassword(currentPassword, newPassword);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordMessage(response.message || "비밀번호가 변경되었습니다.");
+    } catch (error) {
+      setPasswordMessage(getApiErrorMessage(error));
+    } finally {
+      setPasswordSaving(false);
     }
   }
 
@@ -78,13 +112,49 @@ export function AccountPanel() {
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <Input value={nickname} onChange={(event) => setNickname(event.target.value)} />
           <Button variant="primary" disabled={saving} onClick={handleSaveNickname}>
-            save
+            저장
           </Button>
         </div>
         {message && <p className="mt-2 text-[12px] text-textSecondary">{message}</p>}
       </div>
+      <div className="mt-4 border border-border bg-input p-3">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-[13px] font-bold text-textPrimary">비밀번호 변경</h3>
+            <p className="mt-1 text-[12px] leading-5 text-textMuted">
+              새 비밀번호는 문자와 숫자를 포함한 8자 이상으로 설정합니다.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-2">
+          <Input
+            type="password"
+            placeholder="현재 비밀번호"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="새 비밀번호"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="새 비밀번호 확인"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
+          <Button variant="secondary" disabled={passwordSaving} onClick={handleChangePassword}>
+            비밀번호 변경
+          </Button>
+        </div>
+        {passwordMessage && (
+          <p className="mt-2 text-[12px] text-textSecondary">{passwordMessage}</p>
+        )}
+      </div>
       <Button className="mt-4" variant="secondary" onClick={handleLogout}>
-        logout
+        로그아웃
       </Button>
     </Card>
   );

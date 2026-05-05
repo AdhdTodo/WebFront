@@ -84,6 +84,34 @@ Port-based `:5173` and `:8001` URLs are development/demo only. Build the fronten
 and serve `dist` through nginx with React Router fallback. An example config is
 available at `deploy/nginx.yangtheory.site.conf`.
 
+Production deploy outline:
+
+```powershell
+npm ci
+npm run test:run
+npm run build
+```
+
+Copy `dist` to the nginx root, for example `/var/www/adhd-todo-web`, and proxy
+`/api/` to the FastAPI process on `127.0.0.1:8000`. The nginx config must keep
+React Router fallback:
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:8000/api/;
+}
+
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+After nginx is serving the site, apply HTTPS:
+
+```bash
+sudo certbot --nginx -d yangtheory.site -d www.yangtheory.site
+```
+
 ## API Flow
 
 1. Register or login.
@@ -133,11 +161,16 @@ GET /api/v1/routines
 POST /api/v1/routines
 PATCH /api/v1/routines/{routineId}
 DELETE /api/v1/routines/{routineId}
+POST /api/v1/routines/{routineId}/start-action
 ```
 
 Routines are user-owned safety net actions. They are small candidates to return
 to when suggestions stall, not checklist pressure. Production mode shows only
 real API data; mock routines are visible only with `VITE_USE_MOCKS=true`.
+
+Active routines can start an Action directly with `이 루틴으로 시작`. The backend
+returns the created Action, the app stores it as `activeAction`, and the UI moves
+to `/actions/{actionId}`. Inactive routines keep their start button disabled.
 
 ## State Handling
 
@@ -164,7 +197,16 @@ Display name priority:
 Existing backend users may have `nickname: null`; in that case the UI safely
 falls back to the email prefix. Settings shows nickname/email from the same
 authenticated user object. Settings can update nickname and refreshes the topbar
-immediately. Account deletion and password change are planned follow-up items.
+immediately.
+
+Settings also supports password change:
+
+- current password
+- new password
+- confirm new password
+
+The backend validates the current password and applies the same password policy
+used at registration. Account deletion remains a planned follow-up item.
 
 ## Error States
 
@@ -221,6 +263,7 @@ Current next items:
 - AI prompt quality tuning after repeated real use.
 - Mobile polish beyond the first responsive pass.
 - Calendar import as a one-time candidate ingestion flow.
+- refresh token httpOnly cookie migration.
 
 ## Deployment Check
 
@@ -284,8 +327,9 @@ Verified flow:
 13. Return to the session suggestions and click `작게`.
 14. Confirm smaller suggestions are nested under the parent suggestion and do
     not duplicate.
-15. Open `/routines`, create a routine, pause/activate it, delete it, and refresh.
+15. Open `/routines`, create a routine, pause/activate it, start an Action from it, delete it, and refresh.
 16. Open `/settings`, edit nickname, and confirm the top-right profile updates.
+17. Change password in Settings, log out, and log back in with the new password.
 
 Latest manual/API verification result:
 

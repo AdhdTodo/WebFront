@@ -6,11 +6,12 @@ import type { Routine } from "../../api/routines";
 
 interface RoutineListProps {
   routines: Routine[];
+  onStart: (routine: Routine) => void;
   onToggle: (routine: Routine) => void;
   onDelete: (routine: Routine) => void;
 }
 
-export function RoutineList({ routines, onToggle, onDelete }: RoutineListProps) {
+export function RoutineList({ routines, onStart, onToggle, onDelete }: RoutineListProps) {
   const visibleRoutines = routines.length > 0 ? routines : env.useMocks ? mockRoutines : [];
   if (visibleRoutines.length === 0) {
     return (
@@ -27,6 +28,7 @@ export function RoutineList({ routines, onToggle, onDelete }: RoutineListProps) 
         <RoutineCard
           key={routine.id}
           routine={routine}
+          onStart={onStart}
           onToggle={onToggle}
           onDelete={onDelete}
         />

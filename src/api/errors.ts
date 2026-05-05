@@ -5,6 +5,11 @@ export function getApiErrorMessage(error: unknown) {
     return "요청을 처리하지 못했습니다. 잠시 뒤 다시 시도하세요.";
   }
 
+  const responseMessage = error.response?.data?.message;
+  if (typeof responseMessage === "string") {
+    return responseMessage;
+  }
+
   const status = error.response?.status;
   if (status === 401) {
     return "로그인이 만료되었습니다. 다시 로그인해 주세요.";

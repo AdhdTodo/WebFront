@@ -37,10 +37,38 @@ describe("AccountPanel", () => {
     fireEvent.change(screen.getByDisplayValue("이전"), {
       target: { value: "새닉네임" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "save" }));
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
     await waitFor(() => {
       expect(useAuthStore.getState().user?.nickname).toBe("새닉네임");
     });
+  });
+
+  it("changes password through account panel", async () => {
+    vi.mocked(authApi.changePassword).mockResolvedValue({
+      message: "비밀번호가 변경되었습니다.",
+    });
+
+    render(
+      <MemoryRouter>
+        <AccountPanel />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("현재 비밀번호"), {
+      target: { value: "password123" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("새 비밀번호"), {
+      target: { value: "newpass123" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("새 비밀번호 확인"), {
+      target: { value: "newpass123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "비밀번호 변경" }));
+
+    await waitFor(() => {
+      expect(authApi.changePassword).toHaveBeenCalledWith("password123", "newpass123");
+    });
+    expect(await screen.findByText("비밀번호가 변경되었습니다.")).toBeInTheDocument();
   });
 });
