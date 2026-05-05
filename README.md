@@ -32,6 +32,13 @@ VITE_AI_SUGGESTION_ENABLED=false
 VITE_AI_MODEL=gpt-4.1-mini
 ```
 
+Production example:
+
+```text
+VITE_API_BASE_URL=https://yangtheory.site/api/v1
+VITE_USE_MOCKS=false
+```
+
 `VITE_USE_MOCKS=false` is the default service mode. Mock data is only shown when
 `VITE_USE_MOCKS=true`, so API failures or empty API responses are not hidden by
 sample cards.
@@ -92,13 +99,19 @@ npm run test:run
 npm run build
 ```
 
-Copy `dist` to the nginx root, for example `/var/www/adhd-todo-web`, and proxy
+Copy `dist` to the nginx root, for example `/var/www/adhd-todo-web/dist`, and proxy
 `/api/` to the FastAPI process on `127.0.0.1:8000`. The nginx config must keep
 React Router fallback:
 
 ```nginx
+root /var/www/adhd-todo-web/dist;
+
 location /api/ {
     proxy_pass http://127.0.0.1:8000/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 
 location / {
@@ -253,6 +266,10 @@ calls, rate limits, cache, budget guardrails, and fallback behavior.
 If the backend AI status API fails, Settings shows only frontend config hints and
 hides usage metrics so the screen is not mistaken for real backend state.
 
+AI prompt tuning and repeated real OpenAI quality tests are intentionally deferred.
+They can incur API cost, so they should be run only as a separate opt-in backend
+task. Frontend CI/build never calls OpenAI.
+
 ## Backend TODO
 
 The backend now supports `GET /api/v1/actions/{action_id}` and includes
@@ -260,7 +277,7 @@ The backend now supports `GET /api/v1/actions/{action_id}` and includes
 
 Current next items:
 
-- AI prompt quality tuning after repeated real use.
+- AI prompt quality tuning after repeated real use as a separate opt-in task.
 - Mobile polish beyond the first responsive pass.
 - Calendar import as a one-time candidate ingestion flow.
 - refresh token httpOnly cookie migration.
@@ -278,6 +295,7 @@ Check backend health:
 
 ```powershell
 curl http://yangtheory.site:8001/api/v1/health
+curl https://yangtheory.site/api/v1/health
 ```
 
 Check frontend:
@@ -290,6 +308,14 @@ Make sure the frontend is built with:
 
 ```powershell
 $env:VITE_API_BASE_URL='http://yangtheory.site:8001/api/v1'
+$env:VITE_USE_MOCKS='false'
+npm run build
+```
+
+For production builds use:
+
+```powershell
+$env:VITE_API_BASE_URL='https://yangtheory.site/api/v1'
 $env:VITE_USE_MOCKS='false'
 npm run build
 ```
