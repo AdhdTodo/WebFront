@@ -35,3 +35,13 @@ export async function changePassword(currentPassword: string, newPassword: strin
   });
   return response.data;
 }
+
+export async function verifyEmail(token: string) {
+  const response = await apiClient.post<{ message: string }>("/auth/verify-email", { token });
+  return response.data;
+}
+
+export async function resendVerification() {
+  const response = await apiClient.post<{ message: string }>("/auth/resend-verification");
+  return response.data;
+}

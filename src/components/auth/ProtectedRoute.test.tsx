@@ -32,6 +32,7 @@ describe("ProtectedRoute", () => {
       id: 1,
       email: "user@example.com",
       nickname: "유저",
+      email_verified: true,
       created_at: "now",
     });
 

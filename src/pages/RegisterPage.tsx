@@ -55,6 +55,10 @@ export function RegisterPage() {
           닉네임은 화면 오른쪽 위 프로필에 표시됩니다. 비밀번호는 8자 이상, 문자와 숫자를
           포함해야 합니다.
         </p>
+        <p className="mt-2 border border-border bg-input p-3 text-[12px] leading-5 text-textMuted">
+          회원가입 후 인증 메일이 발송됩니다. 기존 흐름처럼 바로 사용할 수 있지만, Settings에서
+          인증 상태를 확인하고 메일을 다시 보낼 수 있습니다.
+        </p>
         <div className="mt-6 space-y-4">
           <div>
             <Input

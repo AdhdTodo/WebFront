@@ -7,6 +7,7 @@ export interface User {
   id: number;
   email: string;
   nickname: string | null;
+  email_verified: boolean;
   created_at: string;
 }
 

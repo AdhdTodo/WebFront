@@ -15,6 +15,7 @@ describe("Topbar", () => {
       id: 1,
       email: "test@example.com",
       nickname: "시열",
+      email_verified: true,
       created_at: "now",
     });
 
@@ -32,6 +33,7 @@ describe("Topbar", () => {
       id: 1,
       email: "prefix@example.com",
       nickname: null,
+      email_verified: false,
       created_at: "now",
     });
 

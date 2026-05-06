@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { changePassword, updateMe } from "../../api/auth";
+import { changePassword, resendVerification, updateMe } from "../../api/auth";
 import { getApiErrorMessage } from "../../api/errors";
 import { useAppStore } from "../../store/appStore";
 import { useAuthStore } from "../../store/authStore";
@@ -24,6 +24,8 @@ export function AccountPanel() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [verificationSending, setVerificationSending] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setNickname(displayName);
@@ -83,6 +85,19 @@ export function AccountPanel() {
     }
   }
 
+  async function handleResendVerification() {
+    setVerificationSending(true);
+    setVerificationMessage(null);
+    try {
+      const response = await resendVerification();
+      setVerificationMessage(response.message || "인증 메일을 다시 보냈습니다.");
+    } catch (error) {
+      setVerificationMessage(getApiErrorMessage(error));
+    } finally {
+      setVerificationSending(false);
+    }
+  }
+
   return (
     <Card title="Account / Security" meta="JWT access / refresh token과 login protection 상태입니다.">
       <div className="space-y-3 text-[13px] text-textSecondary">
@@ -93,6 +108,12 @@ export function AccountPanel() {
         <div className="flex justify-between border-b border-border pb-2">
           <span>user email</span>
           <strong className="text-textPrimary">{user?.email ?? "not loaded"}</strong>
+        </div>
+        <div className="flex justify-between border-b border-border pb-2">
+          <span>email verification</span>
+          <strong className="text-textPrimary">
+            {user?.email_verified ? "인증 완료" : "인증 필요"}
+          </strong>
         </div>
         <div className="flex justify-between border-b border-border pb-2">
           <span>token flow</span>
@@ -106,6 +127,26 @@ export function AccountPanel() {
           <span>rate limit</span>
           <strong className="text-textPrimary">login + brain dumps</strong>
         </div>
+      </div>
+      <div className="mt-4 border border-border bg-input p-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-[13px] font-bold text-textPrimary">이메일 인증</h3>
+            <p className="mt-1 text-[12px] leading-5 text-textMuted">
+              인증 상태는 계정 복구와 알림 기능의 기반으로 사용됩니다.
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            disabled={verificationSending || Boolean(user?.email_verified)}
+            onClick={handleResendVerification}
+          >
+            인증 메일 다시 보내기
+          </Button>
+        </div>
+        {verificationMessage && (
+          <p className="mt-2 text-[12px] text-textSecondary">{verificationMessage}</p>
+        )}
       </div>
       <div className="mt-4 border border-border bg-input p-3">
         <label className="text-[12px] font-semibold text-textSecondary">nickname</label>

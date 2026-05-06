@@ -129,7 +129,9 @@ sudo certbot --nginx -d yangtheory.site -d www.yangtheory.site
 
 1. Register or login.
    New registration asks for a nickname, email, and password. The nickname is
-   shown in the top-right profile area.
+   shown in the top-right profile area. Registration also starts backend email
+   verification; the app keeps the existing login flow and shows verification
+   status in Settings.
 2. The app stores JWT access and refresh tokens in `localStorage`.
 3. On refresh, `users/me` restores the current user.
 4. If an API call returns 401, axios attempts `/auth/refresh`.
@@ -155,6 +157,7 @@ requested path.
 
 - `/login`
 - `/register`
+- `/verify-email`
 - `/today`
 - `/brain-dumps`
 - `/suggestions`
@@ -220,6 +223,23 @@ Settings also supports password change:
 
 The backend validates the current password and applies the same password policy
 used at registration. Account deletion remains a planned follow-up item.
+
+## Email Verification
+
+The backend owns SMTP credentials and token verification. The frontend never
+receives SMTP secrets.
+
+- Registering creates an account with `email_verified=false`.
+- The backend sends a link to `https://yangtheory.site/verify-email?token=...`.
+- `/verify-email` reads the `token` query parameter and calls
+  `POST /api/v1/auth/verify-email`.
+- Settings shows `인증 완료` or `인증 필요` from `users/me.email_verified`.
+- Unverified users can click `인증 메일 다시 보내기`, which calls
+  `POST /api/v1/auth/resend-verification`.
+
+Existing accounts may have no verified email yet. The UI keeps the account usable
+and lets the user request a new verification email from Settings. Password reset
+by email is planned for a later backend flow.
 
 ## Error States
 

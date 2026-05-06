@@ -14,6 +14,7 @@ import { RoutinesPage } from "./pages/RoutinesPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SuggestionsPage } from "./pages/SuggestionsPage";
 import { TodayBoardPage } from "./pages/TodayBoardPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { useAuthStore } from "./store/authStore";
 
 export function App() {
@@ -45,6 +46,7 @@ export function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route element={<ProtectedRoute restoringUser={restoringUser} />}>
         <Route element={<AppLayout />}>
           <Route path="/today" element={<TodayBoardPage />} />
