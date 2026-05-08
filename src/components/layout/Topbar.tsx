@@ -27,7 +27,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted" size={16} />
             <Input className="pl-9" placeholder="Search session, action, signal" />
           </div>
-          <div className="flex h-10 items-center gap-3 rounded-sm border border-border bg-panel px-3 shadow-sm">
+          <div className="flex h-10 items-center gap-3 rounded-sm border border-border bg-panel px-3">
             <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-[11px] font-bold text-textPrimary">
               {avatarInitial}
             </div>

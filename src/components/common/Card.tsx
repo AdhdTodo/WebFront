@@ -9,7 +9,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ title, meta, action, children, className = "", ...props }: CardProps) {
   return (
     <section
-      className={`rounded-card border border-border bg-panel shadow-subtle backdrop-blur ${className}`}
+      className={`rounded-card border border-border bg-panel ${className}`}
       {...props}
     >
       {(title || meta || action) && (

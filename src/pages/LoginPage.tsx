@@ -35,25 +35,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen grid-cols-1 bg-background p-4 lg:grid-cols-[1.08fr_0.92fr] lg:p-6">
-      <section className="flex min-h-[560px] flex-col justify-between rounded-panel border border-border bg-surface p-7 shadow-subtle lg:p-12">
+    <div className="min-h-screen bg-background px-5 py-8 lg:px-8">
+      <main className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-[1160px] grid-cols-1 items-center gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-20">
+      <section className="py-4">
         <div>
-          <div className="inline-flex rounded-full border border-accent/35 bg-accentSoft px-3 py-1 text-[12px] font-bold text-textPrimary">
-            No pressure mode
+          <div className="text-[20px] font-bold tracking-tight text-textPrimary">Decide</div>
+          <div className="mt-1 text-[12px] font-medium uppercase tracking-[0.08em] text-textMuted">
+            ADHD Todo System
           </div>
-          <div className="mt-5 text-[26px] font-bold text-textPrimary">Decide</div>
-          <div className="mt-1 text-[13px] text-textSecondary">ADHD Todo System</div>
         </div>
-        <div>
-          <h1 className="max-w-[560px] text-[42px] font-bold leading-[1.12] tracking-[-0.02em] text-textPrimary">
+        <div className="mt-24 lg:mt-28">
+          <div className="mb-4 text-[12px] font-semibold text-textMuted">No pressure mode</div>
+          <h1 className="max-w-[620px] text-[42px] font-bold leading-[1.12] tracking-[-0.02em] text-textPrimary lg:text-[48px]">
             생각을 정리하지 않아도 작은 행동으로 시작할 수 있게
           </h1>
           <p className="mt-5 max-w-[580px] text-[15px] leading-7 text-textSecondary">
             할 일 목록을 직접 관리하게 만들지 않습니다. Brain Dump를 입력하면 시스템이 여러
             개의 micro-action 후보로 나누고, 사용자는 하나를 선택합니다.
           </p>
-          <div className="mt-8 grid max-w-[680px] grid-cols-1 gap-4 md:grid-cols-[0.92fr_1.08fr]">
-            <div className="rounded-card border border-border bg-panel p-5">
+          <div className="mt-12 max-w-[680px] border-t border-border pt-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-card border border-border bg-panel p-4">
               <div className="mb-3 text-[12px] font-bold text-textMuted">Brain Dump</div>
               <p className="text-[14px] leading-7 text-textPrimary">
                 발표 준비해야 하는데 자료도 없고 메일도 보내야 하고...
@@ -63,7 +65,7 @@ export function LoginPage() {
               {["발표 자료 제목만 작성", "교수님 메일 첫 줄 쓰기"].map((item) => (
                 <div
                   key={item}
-                  className="rounded-card border border-primary bg-primary/45 p-4"
+                  className="rounded-sm border-l-4 border-primary bg-panel px-4 py-3"
                 >
                   <div className="text-[13px] font-bold text-textPrimary">{item}</div>
                   <p className="mt-1 text-[11px] font-medium text-textSecondary">
@@ -72,21 +74,22 @@ export function LoginPage() {
                 </div>
               ))}
             </div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-textSecondary">
+        <div className="mt-12 flex items-center gap-2 text-[12px] text-textSecondary">
           <ShieldCheck size={15} />
           No pressure mode. Signals are not failure labels.
         </div>
       </section>
 
-      <section className="flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-[420px] rounded-panel border border-border bg-panel p-8 shadow-subtle backdrop-blur">
+      <section className="flex justify-center lg:justify-end">
+        <div className="w-full max-w-[420px] rounded-card border border-border bg-panel p-7 shadow-subtle">
           <h2 className="text-[26px] font-bold text-textPrimary">Login</h2>
           <p className="mt-2 text-[13px] leading-6 text-textSecondary">
             JWT access / refresh token, login protection, rate limiting이 적용됩니다.
           </p>
-          <div className="mt-7 space-y-4">
+          <div className="mt-7 space-y-3">
             <Input
               placeholder="email"
               type="email"
@@ -112,12 +115,13 @@ export function LoginPage() {
           </div>
           <div className="mt-5 text-[13px] text-textSecondary">
             계정이 없다면{" "}
-            <Link className="font-bold text-textPrimary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent" to="/register">
+            <Link className="font-bold text-textPrimary hover:text-accent" to="/register">
               register
             </Link>
           </div>
         </div>
       </section>
+      </main>
     </div>
   );
 }

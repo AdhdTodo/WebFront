@@ -33,7 +33,9 @@ export function ActiveActionPanel({
       <Badge tone={action.status === "active" ? "active" : "success"}>
         {translateActionStatus(action.status)}
       </Badge>
-      <h2 className="mt-4 text-[20px] font-bold text-textPrimary">{action.title}</h2>
+      <h2 className="mt-4 border-l-4 border-primary pl-3 text-[20px] font-bold text-textPrimary">
+        {action.title}
+      </h2>
       <p className="mt-2 text-[14px] leading-6 text-textSecondary">{action.micro_step}</p>
       <div className="mt-4 rounded-card border border-accent/35 bg-accentSoft p-3 text-[12px] leading-5 text-textSecondary">
         중단은 실패가 아니라 다음 제안을 더 작게 만들기 위한 신호입니다.

@@ -49,7 +49,7 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-[480px] rounded-panel border border-border bg-panel p-8 shadow-subtle backdrop-blur">
+      <div className="w-full max-w-[480px] rounded-card border border-border bg-panel p-7 shadow-subtle">
         <div className="text-[24px] font-bold text-textPrimary">Create account</div>
         <p className="mt-2 text-[13px] leading-6 text-textSecondary">
           닉네임은 화면 오른쪽 위 프로필에 표시됩니다. 비밀번호는 8자 이상, 문자와 숫자를

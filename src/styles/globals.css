@@ -11,7 +11,9 @@
   --color-muted: rgba(47, 52, 50, 0.65);
   --color-line: rgba(47, 52, 50, 0.12);
   --color-panel: rgba(255, 255, 255, 0.72);
-  --shadow-soft: 0 18px 45px rgba(47, 52, 50, 0.08);
+  --shadow-subtle: 0 12px 30px rgba(47, 52, 50, 0.05);
+  --radius-card: 8px;
+  --radius-control: 6px;
   color: var(--color-text);
   background: var(--color-bg);
   font-family: Inter, system-ui, sans-serif;
@@ -25,10 +27,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(192, 225, 210, 0.38), transparent 28rem),
-    radial-gradient(circle at bottom right, rgba(220, 155, 155, 0.18), transparent 24rem),
-    var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-text);
 }
 

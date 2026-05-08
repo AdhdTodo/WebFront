@@ -24,12 +24,12 @@ export default {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        sm: "12px",
-        card: "18px",
-        panel: "26px",
+        sm: "6px",
+        card: "8px",
+        panel: "8px",
       },
       boxShadow: {
-        subtle: "0 18px 45px rgba(47, 52, 50, 0.08)",
+        subtle: "0 12px 30px rgba(47, 52, 50, 0.05)",
       },
     },
   },

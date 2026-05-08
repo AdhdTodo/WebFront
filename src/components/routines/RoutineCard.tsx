@@ -11,7 +11,7 @@ interface RoutineCardProps {
 
 export function RoutineCard({ routine, onStart, onToggle, onDelete }: RoutineCardProps) {
   return (
-    <article className="rounded-card border border-border bg-surface p-4 shadow-subtle">
+    <article className="rounded-card border border-border bg-panel p-4">
       <div className="flex items-center justify-between">
         <Badge tone={routine.effort_level === "neutral" ? "neutral" : "quiet"}>
           {routine.effort_level}

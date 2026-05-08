@@ -142,13 +142,13 @@ export function TodayBoardPage() {
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value]) => (
-          <Card key={label} className="p-4">
+          <Card key={label} className="bg-surface/70 p-4">
             <div className="text-[12px] font-semibold text-textMuted">{label}</div>
             <div className="mt-2 text-[24px] font-bold text-textPrimary">{value}</div>
           </Card>
         ))}
       </div>
-      <Card className="p-3">
+      <Card className="bg-panel p-3">
         <div className="flex items-center justify-between text-[12px]">
           <span className="font-semibold text-textSecondary">API status</span>
           <span className="text-textMuted">{statusMessage}</span>
@@ -192,9 +192,9 @@ export function TodayBoardPage() {
               ))}
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 text-[12px] text-textSecondary">
-              <div className="bg-input p-2">AI fallback / ready</div>
-              <div className="bg-input p-2">Routines / enabled</div>
-              <div className="bg-input p-2">Calendar import / planned</div>
+              <div className="rounded-sm border border-border bg-input p-2">AI fallback / ready</div>
+              <div className="rounded-sm border border-border bg-input p-2">Routines / enabled</div>
+              <div className="rounded-sm border border-border bg-input p-2">Calendar import / planned</div>
             </div>
           </Card>
         </div>

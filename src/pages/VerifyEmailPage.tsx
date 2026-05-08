@@ -40,7 +40,7 @@ export function VerifyEmailPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-[480px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
+      <div className="w-full max-w-[480px] rounded-card border border-border bg-panel p-7 shadow-subtle">
         <div className="text-[24px] font-bold text-textPrimary">Email verification</div>
         <p className="mt-3 text-[13px] leading-6 text-textSecondary">{message}</p>
         {state === "loading" && (

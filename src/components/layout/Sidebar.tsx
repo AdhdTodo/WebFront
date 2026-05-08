@@ -56,7 +56,7 @@ export function Sidebar() {
                   className={({ isActive }) =>
                     `flex h-9 items-center gap-2 rounded-sm px-2 text-[13px] font-medium transition ${
                       isActive
-                        ? "bg-primary text-textPrimary shadow-sm"
+                        ? "bg-primary text-textPrimary"
                         : "text-textSecondary hover:bg-accentSoft hover:text-textPrimary"
                     }`
                   }
