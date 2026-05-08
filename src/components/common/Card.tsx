@@ -9,11 +9,11 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ title, meta, action, children, className = "", ...props }: CardProps) {
   return (
     <section
-      className={`rounded-card border border-border bg-surface shadow-subtle ${className}`}
+      className={`rounded-card border border-border bg-panel shadow-subtle backdrop-blur ${className}`}
       {...props}
     >
       {(title || meta || action) && (
-        <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-3">
+        <div className="flex items-start justify-between gap-4 border-b border-border bg-surface/55 px-4 py-3">
           <div>
             {title && <h2 className="text-[15px] font-bold text-textPrimary">{title}</h2>}
             {meta && <p className="mt-1 text-[12px] leading-5 text-textSecondary">{meta}</p>}

@@ -24,6 +24,7 @@ export function BrainDumpComposer({
 
   return (
     <Card
+      className="bg-surface/85"
       title={compact ? "Brain Dump" : "New Brain Dump"}
       meta={
         compact
@@ -37,7 +38,7 @@ export function BrainDumpComposer({
         rows={compact ? 5 : 10}
         placeholder="정리하지 말고 지금 머릿속에 있는 걸 그대로 적어도 괜찮아요."
       />
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] text-textMuted">쉼표, 줄바꿈, 긴 문장 모두 그대로 두세요.</p>
         <div className="flex gap-2">
           <Button

@@ -1,4 +1,4 @@
-import type { Feedback } from "../../types/api";
+﻿import type { Feedback } from "../../types/api";
 import { Badge } from "../common/Badge";
 import { Card } from "../common/Card";
 import { EmptyState } from "../common/EmptyState";
@@ -20,7 +20,7 @@ export function HistoryTimeline({ feedback = [] }: HistoryTimelineProps) {
         {feedback.map((feedback) => (
           <div key={feedback.id} className="flex items-start justify-between border-b border-border pb-3">
             <div>
-              <Badge tone={feedback.reaction === "do" ? "green" : "muted"}>
+              <Badge tone={feedback.reaction === "do" ? "success" : "muted"}>
                 {translateReaction(feedback.reaction)}
               </Badge>
               <p className="mt-2 text-[13px] text-textSecondary">

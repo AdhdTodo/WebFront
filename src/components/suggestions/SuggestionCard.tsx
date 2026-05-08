@@ -20,7 +20,7 @@ export function SuggestionCard({
   onPass,
 }: SuggestionCardProps) {
   return (
-    <article className="border-l-2 border-primary bg-surface p-4 shadow-subtle">
+    <article className="rounded-card border border-border bg-panel p-4 shadow-subtle transition hover:border-accent/45 hover:bg-surface">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Badge tone={suggestion.effort_level === "neutral" ? "neutral" : "quiet"}>
@@ -33,7 +33,7 @@ export function SuggestionCard({
       <h3 className="mt-3 text-[15px] font-bold text-textPrimary">{suggestion.title}</h3>
       <p className="mt-2 text-[13px] leading-6 text-textSecondary">{suggestion.micro_step}</p>
       {!compact && (
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="primary" icon={<Check size={14} />} onClick={() => onDo?.(suggestion)}>
             선택
           </Button>

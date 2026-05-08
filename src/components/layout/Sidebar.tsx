@@ -37,7 +37,7 @@ const groups = [
 
 export function Sidebar() {
   return (
-    <aside className="border-b border-border bg-sidebar lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[244px] lg:flex-col lg:border-b-0 lg:border-r">
+    <aside className="border-b border-border bg-sidebar/95 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[244px] lg:flex-col lg:border-b-0 lg:border-r">
       <div className="border-b border-border px-4 py-4 lg:px-5 lg:py-5">
         <div className="text-[19px] font-bold tracking-tight text-textPrimary">Decide</div>
         <div className="mt-1 text-[12px] font-medium text-textSecondary">ADHD Todo System</div>
@@ -56,8 +56,8 @@ export function Sidebar() {
                   className={({ isActive }) =>
                     `flex h-9 items-center gap-2 rounded-sm px-2 text-[13px] font-medium transition ${
                       isActive
-                        ? "bg-primarySoft text-primary"
-                        : "text-textSecondary hover:bg-surfaceSubtle hover:text-textPrimary"
+                        ? "bg-primary text-textPrimary shadow-sm"
+                        : "text-textSecondary hover:bg-accentSoft hover:text-textPrimary"
                     }`
                   }
                 >
@@ -70,8 +70,8 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="hidden border-t border-border p-4 lg:block">
-        <div className="rounded-card border border-border bg-surface p-3">
-          <div className="flex items-center gap-2 text-[12px] font-bold text-primary">
+        <div className="rounded-card border border-border bg-panel p-3">
+          <div className="flex items-center gap-2 text-[12px] font-bold text-textPrimary">
             <Settings size={14} />
             No pressure mode
           </div>

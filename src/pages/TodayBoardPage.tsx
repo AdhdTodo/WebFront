@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
@@ -172,7 +172,7 @@ export function TodayBoardPage() {
           <Card title="Review / Signals" meta="최근 흐름과 예정 모듈을 함께 봅니다.">
             <div className="mb-4 flex flex-wrap gap-2">
               {["선택", "이번엔 넘기기", "나중에 보기", "더 작게"].map((signal) => (
-                <Badge key={signal} tone={signal === "선택" ? "green" : "muted"}>
+                <Badge key={signal} tone={signal === "선택" ? "success" : "muted"}>
                   {signal}
                 </Badge>
               ))}

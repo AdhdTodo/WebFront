@@ -48,14 +48,14 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-[460px] rounded-panel border border-border bg-surface p-8 shadow-subtle">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-[480px] rounded-panel border border-border bg-panel p-8 shadow-subtle backdrop-blur">
         <div className="text-[24px] font-bold text-textPrimary">Create account</div>
         <p className="mt-2 text-[13px] leading-6 text-textSecondary">
           닉네임은 화면 오른쪽 위 프로필에 표시됩니다. 비밀번호는 8자 이상, 문자와 숫자를
           포함해야 합니다.
         </p>
-        <p className="mt-2 border border-border bg-input p-3 text-[12px] leading-5 text-textMuted">
+        <p className="mt-4 rounded-card border border-accent/35 bg-accentSoft p-3 text-[12px] leading-5 text-textSecondary">
           회원가입 후 인증 메일이 발송됩니다. 기존 흐름처럼 바로 사용할 수 있지만, Settings에서
           인증 상태를 확인하고 메일을 다시 보낼 수 있습니다.
         </p>
@@ -88,7 +88,7 @@ export function RegisterPage() {
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
-          {error && <p className="text-[12px] text-redMuted">{error}</p>}
+          {error && <p className="text-[12px] font-semibold text-textPrimary">{error}</p>}
           <Button
             className="w-full"
             variant="primary"
@@ -100,7 +100,7 @@ export function RegisterPage() {
         </div>
         <div className="mt-5 text-[13px] text-textSecondary">
           이미 계정이 있다면{" "}
-          <Link className="font-bold text-primary" to="/login">
+          <Link className="font-bold text-textPrimary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent" to="/login">
             login
           </Link>
         </div>

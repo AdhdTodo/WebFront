@@ -1,13 +1,13 @@
-import { Badge } from "../common/Badge";
+﻿import { Badge } from "../common/Badge";
 import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 
 const reactions = [
-  ["선택", "green"],
+  ["선택", "success"],
   ["나중에 보기", "muted"],
   ["이번엔 넘기기", "muted"],
   ["기록만", "muted"],
-  ["더 작게", "amber"],
+  ["더 작게", "accent"],
 ] as const;
 
 export function FeedbackPanel() {

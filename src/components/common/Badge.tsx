@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
 
-type BadgeTone = "quiet" | "gentle" | "neutral" | "active" | "muted" | "amber" | "green";
+type BadgeTone = "quiet" | "gentle" | "neutral" | "active" | "muted" | "accent" | "success";
 
 const tones: Record<BadgeTone, string> = {
-  quiet: "border-primarySoft bg-primarySoft text-primary",
-  gentle: "border-[#d9d4c8] bg-surfaceSubtle text-textSecondary",
-  neutral: "border-[#d5dbea] bg-[#eef2f8] text-blue",
-  active: "border-primary bg-primary text-white",
-  muted: "border-border bg-input text-textSecondary",
-  amber: "border-[#ead4b7] bg-[#f8efe3] text-amber",
-  green: "border-[#c9ddcf] bg-[#e7f0ea] text-green",
+  quiet: "border-primary bg-primary/60 text-textPrimary",
+  gentle: "border-border bg-surface text-textSecondary",
+  neutral: "border-accent/35 bg-accentSoft text-textPrimary",
+  active: "border-primary bg-primary text-textPrimary",
+  muted: "border-border bg-surfaceSubtle text-textSecondary",
+  accent: "border-accent/35 bg-accentSoft text-textPrimary",
+  success: "border-primary bg-primary/70 text-textPrimary",
 };
 
 interface BadgeProps {

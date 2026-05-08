@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 import { getAIStatus, getMyAIUsage, type AIStatus, type AIUsageMe } from "../../api/ai";
 import { getApiErrorMessage } from "../../api/errors";
@@ -50,7 +50,7 @@ export function AiSettingsPanel() {
             <div className="text-textMuted">AI Suggestion</div>
             <div className="mt-2 flex items-center justify-between">
               <strong>{aiStatus}</strong>
-              <Badge tone={status?.enabled ? "green" : "muted"}>optional</Badge>
+              <Badge tone={status?.enabled ? "success" : "muted"}>optional</Badge>
             </div>
           </div>
           <div className="rounded-card border border-border bg-input p-3">

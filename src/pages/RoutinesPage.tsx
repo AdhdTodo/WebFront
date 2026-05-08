@@ -119,7 +119,7 @@ export function RoutinesPage() {
             onChange={(event) => setMicroStep(event.target.value)}
           />
           <select
-            className="h-10 rounded-sm border border-border bg-input px-3 text-[13px]"
+            className="h-10 rounded-sm border border-border bg-input px-3 text-[13px] text-textPrimary outline-none transition focus:border-accent focus:shadow-[0_0_0_4px_rgba(220,155,155,0.22)]"
             value={effortLevel}
             onChange={(event) =>
               setEffortLevel(event.target.value as "quiet" | "gentle" | "neutral")
@@ -133,7 +133,7 @@ export function RoutinesPage() {
             추가
           </Button>
         </div>
-        {error && <p className="mt-3 text-[12px] text-redMuted">{error}</p>}
+        {error && <p className="mt-3 text-[12px] font-semibold text-textPrimary">{error}</p>}
       </Card>
       {loading && <LoadingState message="루틴을 불러오는 중입니다." />}
       {!loading && error && routines.length === 0 && (
