@@ -17,11 +17,11 @@ export function SuggestionBoard({
   onPass,
 }: SuggestionBoardProps) {
   return (
-    <Card title="Generated Suggestions" meta="처음부터 하나만 고르지 않고 후보를 비교합니다.">
+    <Card title="행동 후보" meta="처음부터 하나만 고르지 않고 후보를 비교합니다.">
       {suggestions.length === 0 && (
         <EmptyState
           title="아직 생성된 후보가 없습니다."
-          description="Brain Dump를 입력하면 여러 suggestion이 여기에 표시됩니다."
+          description="생각을 입력하면 여러 행동 후보가 여기에 표시됩니다."
         />
       )}
       <div className="space-y-3">

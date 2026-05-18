@@ -20,7 +20,7 @@ export function ActiveActionPage() {
   const smallerSuggestions = useAppStore((state) => state.smallerSuggestions);
   const setActiveAction = useAppStore((state) => state.setActiveAction);
   const [abortReason, setAbortReason] = useState("");
-  const [statusMessage, setStatusMessage] = useState("선택된 Action 흐름을 확인합니다.");
+  const [statusMessage, setStatusMessage] = useState("선택된 실행 흐름을 확인합니다.");
   const [loading, setLoading] = useState(false);
   const relatedSmaller =
     smallerSuggestions.length > 0
@@ -48,7 +48,7 @@ export function ActiveActionPage() {
     try {
       const updated = await completeAction(activeAction.id, "completed from focus view");
       setActiveAction(updated);
-      setStatusMessage("완료 신호를 저장했습니다. History에서 최근 흐름으로 확인할 수 있습니다.");
+      setStatusMessage("완료 신호를 저장했습니다. 최근 흐름에서 확인할 수 있습니다.");
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
     }
@@ -71,7 +71,7 @@ export function ActiveActionPage() {
       <div className="space-y-5">
         <Card className="p-3">
           <div className="flex items-center justify-between text-[12px]">
-            <span className="font-semibold text-textSecondary">action status</span>
+            <span className="font-semibold text-textSecondary">실행 상태</span>
             <span className="text-textMuted">{statusMessage}</span>
           </div>
         </Card>
@@ -96,7 +96,7 @@ export function ActiveActionPage() {
             중단 기록 저장
           </Button>
         </Card>
-        <Card title="Related smaller actions" meta="원한다면 더 작은 단위에서 다시 시작할 수 있습니다.">
+        <Card title="더 작은 행동 후보" meta="원한다면 더 작은 단위에서 다시 시작할 수 있습니다.">
           {relatedSmaller.length === 0 && (
             <EmptyState
               title="연결된 더 작은 후보가 없습니다."
@@ -115,18 +115,18 @@ export function ActiveActionPage() {
           </div>
         </Card>
       </div>
-      <Card title="Action detail" meta="Action은 선택 이후 하나로 수렴합니다.">
+      <Card title="실행 세부 정보" meta="행동은 선택 이후 하나로 수렴합니다.">
         <div className="space-y-3 text-[13px] text-textSecondary">
-          <Row label="status" value={activeAction?.status ?? "no active action"} />
-          <Row label="session id" value={activeAction ? `#${activeAction.session_id}` : "-"} />
+          <Row label="상태" value={activeAction?.status ?? "실행 중인 행동 없음"} />
+          <Row label="세션" value={activeAction ? `#${activeAction.session_id}` : "-"} />
           <Row
-            label="suggestion id"
+            label="후보"
             value={activeAction?.suggestion_id ? `#${activeAction.suggestion_id}` : "-"}
           />
-          <Row label="estimated time" value="2-5 min" />
+          <Row label="예상 시간" value="2~5분" />
         </div>
         <div className="mt-5 space-y-2 border-l-2 border-primary pl-3 text-[12px] text-textSecondary">
-          {["Brain Dump", "Suggestion selected", "Feedback do", "Action active", "Complete or Abort"].map(
+          {["생각 입력", "행동 후보 선택", "선택 신호 저장", "실행 중", "완료 또는 중단 기록"].map(
             (step) => (
               <div key={step}>{step}</div>
             ),

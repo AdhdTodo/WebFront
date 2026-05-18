@@ -15,23 +15,23 @@ const groups = [
   {
     label: "MAIN",
     items: [
-      { to: "/today", label: "Today Board", icon: ClipboardList },
-      { to: "/brain-dumps", label: "Brain Dumps", icon: ListChecks },
-      { to: "/suggestions", label: "Suggestions", icon: Sparkles },
-      { to: "/actions/active", label: "Actions", icon: CheckSquare },
+      { to: "/today", label: "오늘", icon: ClipboardList },
+      { to: "/brain-dumps", label: "생각 쏟아내기", icon: ListChecks },
+      { to: "/suggestions", label: "행동 후보", icon: Sparkles },
+      { to: "/actions/active", label: "실행", icon: CheckSquare },
     ],
   },
   {
     label: "REVIEW",
     items: [
-      { to: "/history", label: "History", icon: History },
-      { to: "/routines", label: "Routines", icon: ShieldCheck },
-      { to: "/settings", label: "Calendar Import", icon: CalendarDays },
+      { to: "/history", label: "최근 흐름", icon: History },
+      { to: "/routines", label: "루틴", icon: ShieldCheck },
+      { to: "/settings", label: "캘린더 가져오기", icon: CalendarDays },
     ],
   },
   {
     label: "SYSTEM",
-    items: [{ to: "/settings", label: "AI Settings / Account", icon: Bot }],
+    items: [{ to: "/settings", label: "AI / 계정 설정", icon: Bot }],
   },
 ];
 
@@ -40,7 +40,7 @@ export function Sidebar() {
     <aside className="border-b border-border bg-sidebar/95 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[244px] lg:flex-col lg:border-b-0 lg:border-r">
       <div className="border-b border-border px-4 py-4 lg:px-5 lg:py-5">
         <div className="text-[19px] font-bold tracking-tight text-textPrimary">Decide</div>
-        <div className="mt-1 text-[12px] font-medium text-textSecondary">ADHD Todo System</div>
+        <div className="mt-1 text-[12px] font-medium text-textSecondary">ADHD 일정 도우미</div>
       </div>
       <nav className="flex gap-3 overflow-x-auto px-3 py-3 lg:block lg:flex-1 lg:overflow-y-auto lg:py-4">
         {groups.map((group) => (
@@ -73,7 +73,7 @@ export function Sidebar() {
         <div className="rounded-card border border-border bg-panel p-3">
           <div className="flex items-center gap-2 text-[12px] font-bold text-textPrimary">
             <Settings size={14} />
-            No pressure mode
+            부담 낮은 모드
           </div>
           <p className="mt-2 text-[12px] leading-5 text-textSecondary">
             반응은 실패가 아니라 다음 제안 조절 신호입니다.

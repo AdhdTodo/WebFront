@@ -19,17 +19,17 @@ export function ActiveActionPanel({
 }: ActiveActionPanelProps) {
   if (!action) {
     return (
-      <Card title="Active Action" meta="선택된 suggestion이 하나의 실행 단위로 수렴합니다.">
+      <Card title="실행 중인 행동" meta="선택된 후보가 하나의 실행 단위로 수렴합니다.">
         <EmptyState
           title="현재 실행 중인 행동이 없습니다."
-          description="suggestion 중 하나를 선택하면 여기에 집중 실행 단위가 표시됩니다."
+          description="행동 후보 중 하나를 선택하면 여기에 집중 실행 단위가 표시됩니다."
         />
       </Card>
     );
   }
 
   return (
-    <Card title="Active Action" meta="선택된 suggestion이 하나의 실행 단위로 수렴했습니다.">
+    <Card title="실행 중인 행동" meta="선택된 후보가 하나의 실행 단위로 수렴했습니다.">
       <Badge tone={action.status === "active" ? "active" : "success"}>
         {translateActionStatus(action.status)}
       </Badge>

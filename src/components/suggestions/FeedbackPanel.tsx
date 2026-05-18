@@ -12,10 +12,7 @@ const reactions = [
 
 export function FeedbackPanel() {
   return (
-    <Card
-      title="Feedback reaction"
-      meta="반응은 평가가 아니라 다음 제안을 조절하는 신호입니다."
-    >
+    <Card title="반응 신호" meta="반응은 평가가 아니라 다음 제안을 조절하는 신호입니다.">
       <div className="flex flex-wrap gap-2">
         {reactions.map(([label, tone]) => (
           <Badge key={label} tone={tone}>

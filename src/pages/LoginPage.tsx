@@ -40,9 +40,7 @@ export function LoginPage() {
       <section className="py-4">
         <div>
           <div className="text-[20px] font-bold tracking-tight text-textPrimary">Decide</div>
-          <div className="mt-1 text-[12px] font-medium uppercase tracking-[0.08em] text-textMuted">
-            ADHD Todo System
-          </div>
+          <div className="mt-1 text-[12px] font-medium text-textMuted">ADHD 일정 도우미</div>
         </div>
         <div className="mt-24 lg:mt-28">
           <div className="mb-4 text-[12px] font-semibold text-textMuted">No pressure mode</div>
@@ -50,13 +48,13 @@ export function LoginPage() {
             생각을 정리하지 않아도 작은 행동으로 시작할 수 있게
           </h1>
           <p className="mt-5 max-w-[580px] text-[15px] leading-7 text-textSecondary">
-            할 일 목록을 직접 관리하게 만들지 않습니다. Brain Dump를 입력하면 시스템이 여러
-            개의 micro-action 후보로 나누고, 사용자는 하나를 선택합니다.
+            할 일 목록을 직접 관리하게 만들지 않습니다. 생각을 입력하면 시스템이 여러
+            개의 작은 행동 후보로 나누고, 사용자는 하나를 선택합니다.
           </p>
           <div className="mt-12 max-w-[680px] border-t border-border pt-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-card border border-border bg-panel p-4">
-              <div className="mb-3 text-[12px] font-bold text-textMuted">Brain Dump</div>
+              <div className="mb-3 text-[12px] font-bold text-textMuted">생각 쏟아내기</div>
               <p className="text-[14px] leading-7 text-textPrimary">
                 발표 준비해야 하는데 자료도 없고 메일도 보내야 하고...
               </p>
@@ -69,7 +67,7 @@ export function LoginPage() {
                 >
                   <div className="text-[13px] font-bold text-textPrimary">{item}</div>
                   <p className="mt-1 text-[11px] font-medium text-textSecondary">
-                    quiet micro-action
+                    조용한 시작 행동
                   </p>
                 </div>
               ))}
@@ -85,7 +83,7 @@ export function LoginPage() {
 
       <section className="flex justify-center lg:justify-end">
         <div className="w-full max-w-[420px] rounded-card border border-border bg-panel p-7 shadow-subtle">
-          <h2 className="text-[26px] font-bold text-textPrimary">Login</h2>
+          <h2 className="text-[26px] font-bold text-textPrimary">로그인</h2>
           <p className="mt-2 text-[13px] leading-6 text-textSecondary">
             JWT access / refresh token, login protection, rate limiting이 적용됩니다.
           </p>
@@ -109,14 +107,14 @@ export function LoginPage() {
               disabled={loading || !email || !password}
               onClick={handleLogin}
             >
-              {loading ? "logging in" : "login"}
+              {loading ? "로그인 중" : "로그인"}
               <ArrowRight size={15} />
             </Button>
           </div>
           <div className="mt-5 text-[13px] text-textSecondary">
             계정이 없다면{" "}
             <Link className="font-bold text-textPrimary hover:text-accent" to="/register">
-              register
+              회원가입
             </Link>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
@@ -18,6 +18,9 @@ import { mockSuggestions } from "../mockData";
 import { useAppStore } from "../store/appStore";
 import type { Action, HistoryResponse, Suggestion } from "../types/api";
 
+const weekDays = ["월", "화", "수", "목", "금", "토", "일"];
+const timeSlots = ["09:00", "10:30", "13:00", "14:30", "16:00"];
+
 export function TodayBoardPage() {
   const navigate = useNavigate();
   const currentSession = useAppStore((state) => state.currentSession);
@@ -31,7 +34,7 @@ export function TodayBoardPage() {
   const [statusMessage, setStatusMessage] = useState(
     currentSuggestions.length > 0
       ? `session #${currentSession?.id} 후보를 복원했습니다.`
-      : "로그인 후 Brain Dump를 입력하면 실제 API로 후보를 생성합니다.",
+      : "로그인 후 생각을 입력하면 실제 API로 행동 후보를 생성합니다.",
   );
   const [history, setHistory] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +42,35 @@ export function TodayBoardPage() {
     currentSuggestions.length > 0 ? currentSuggestions : env.useMocks ? mockSuggestions : [];
   const visibleSuggestions = suggestions.filter(
     (suggestion) => suggestion.generation_type !== "smaller",
+  );
+  const recentActions = history?.actions.slice(0, 4) ?? [];
+  const calendarBlocks = useMemo(
+    () => [
+      ...(activeAction
+        ? [
+            {
+              dayIndex: 0,
+              slotIndex: 1,
+              title: activeAction.title,
+              meta: "실행 중",
+              tone: "active" as const,
+            },
+          ]
+        : []),
+      ...recentActions.slice(0, 4).map((action, index) => ({
+        dayIndex: (index + 1) % weekDays.length,
+        slotIndex: (index + 2) % timeSlots.length,
+        title: action.title,
+        meta:
+          action.status === "completed"
+            ? "완료됨"
+            : action.status === "aborted"
+              ? "중단 기록"
+              : "기록됨",
+        tone: action.status === "aborted" ? ("soft" as const) : ("neutral" as const),
+      })),
+    ],
+    [activeAction, recentActions],
   );
 
   useEffect(() => {
@@ -48,15 +80,15 @@ export function TodayBoardPage() {
   }, []);
 
   const metrics = [
-    ["Today suggestions", String(visibleSuggestions.length)],
-    ["Active actions", activeAction?.status === "active" ? "1" : "0"],
-    ["Feedback signals", String(feedbackCount)],
-    ["Mode", "No pressure"],
+    ["행동 후보", String(visibleSuggestions.length)],
+    ["실행 중", activeAction?.status === "active" ? "1" : "0"],
+    ["반응 신호", String(feedbackCount)],
+    ["보기", "주간"],
   ];
 
   async function handleCreateBrainDump(rawText: string) {
     setLoading(true);
-    setStatusMessage("백엔드에 Brain Dump를 보내는 중");
+    setStatusMessage("백엔드에 생각을 보내는 중");
     try {
       const response = await createBrainDump(rawText, currentSession?.id);
       setCurrentSession(response.session);
@@ -140,65 +172,184 @@ export function TodayBoardPage() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(([label, value]) => (
-          <Card key={label} className="bg-surface/70 p-4">
-            <div className="text-[12px] font-semibold text-textMuted">{label}</div>
-            <div className="mt-2 text-[24px] font-bold text-textPrimary">{value}</div>
-          </Card>
-        ))}
-      </div>
-      <Card className="bg-panel p-3">
-        <div className="flex items-center justify-between text-[12px]">
-          <span className="font-semibold text-textSecondary">API status</span>
-          <span className="text-textMuted">{statusMessage}</span>
-        </div>
-      </Card>
-      <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <SuggestionBoard
-          suggestions={visibleSuggestions}
-          onDo={handleDo}
-          onMakeSmaller={handleMakeSmaller}
-          onPass={handlePass}
-        />
-        <ActiveActionPanel
-          action={activeAction}
-          onComplete={handleComplete}
-          onAbort={handleAbort}
-        />
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
         <div className="space-y-5">
-          <FeedbackPanel />
-          <Card title="Review / Signals" meta="최근 흐름과 예정 모듈을 함께 봅니다.">
-            <div className="mb-4 flex flex-wrap gap-2">
-              {["선택", "이번엔 넘기기", "나중에 보기", "더 작게"].map((signal) => (
-                <Badge key={signal} tone={signal === "선택" ? "success" : "muted"}>
-                  {signal}
-                </Badge>
-              ))}
+          <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
+          <SuggestionBoard
+            suggestions={visibleSuggestions}
+            onDo={handleDo}
+            onMakeSmaller={handleMakeSmaller}
+            onPass={handlePass}
+          />
+        </div>
+
+        <div className="space-y-5">
+          <Card className="bg-panel">
+            <div className="flex flex-col gap-4 border-b border-border pb-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div className="text-[12px] font-semibold text-textMuted">이번 주 캘린더</div>
+                <h2 className="mt-1 text-[22px] font-bold text-textPrimary">
+                  후보를 고르면 실행할 행동이 시간 흐름 안에 놓입니다.
+                </h2>
+                <p className="mt-2 max-w-[680px] text-[13px] leading-6 text-textSecondary">
+                  아직 실제 드래그 앤 드롭 일정 저장은 다음 단계입니다. 지금은 생성된 행동
+                  후보와 실행 중인 행동을 한 화면에서 보며 흐름을 잡습니다.
+                </p>
+              </div>
+              <div className="flex gap-2 text-[12px]">
+                {["월", "주", "일"].map((view) => (
+                  <button
+                    key={view}
+                    className={`h-8 rounded-sm border px-3 font-semibold ${
+                      view === "주"
+                        ? "border-primary bg-primary text-textPrimary"
+                        : "border-border bg-input text-textSecondary hover:border-accent"
+                    }`}
+                    type="button"
+                  >
+                    {view}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="space-y-2">
-              {!history && (
-                <EmptyState
-                  title="아직 최근 흐름이 없습니다."
-                  description="Action이나 reaction이 저장되면 이곳에 표시됩니다."
-                />
-              )}
-              {history?.actions.slice(0, 3).map((action) => (
-                <div key={action.id} className="flex justify-between text-[12px]">
-                  <span className="text-textSecondary">{action.title}</span>
-                  <span className="text-textMuted">{action.status}</span>
+
+            <div className="mt-4 grid grid-cols-[64px_repeat(7,minmax(92px,1fr))] overflow-x-auto border border-border bg-input text-[12px]">
+              <div className="border-b border-r border-border bg-surface px-2 py-3 font-semibold text-textMuted">
+                시간
+              </div>
+              {weekDays.map((day) => (
+                <div
+                  key={day}
+                  className="border-b border-r border-border bg-surface px-3 py-3 font-bold text-textPrimary last:border-r-0"
+                >
+                  {day}
                 </div>
               ))}
+              {timeSlots.map((slot, slotIndex) => (
+                <CalendarRow
+                  key={slot}
+                  slot={slot}
+                  slotIndex={slotIndex}
+                  blocks={calendarBlocks}
+                />
+              ))}
             </div>
-            <div className="mt-4 grid grid-cols-1 gap-2 text-[12px] text-textSecondary">
-              <div className="rounded-sm border border-border bg-input p-2">AI fallback / ready</div>
-              <div className="rounded-sm border border-border bg-input p-2">Routines / enabled</div>
-              <div className="rounded-sm border border-border bg-input p-2">Calendar import / planned</div>
-            </div>
+
+            {calendarBlocks.length === 0 && (
+              <div className="mt-4">
+                <EmptyState
+                  title="오늘은 아직 비어 있습니다."
+                  description="생각을 입력하고 행동 후보를 선택하면 실행할 행동이 이 흐름 안에 표시됩니다."
+                />
+              </div>
+            )}
           </Card>
+
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <ActiveActionPanel
+              action={activeAction}
+              onComplete={handleComplete}
+              onAbort={handleAbort}
+            />
+            <div className="space-y-5">
+              <Card className="bg-panel p-3">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="font-semibold text-textSecondary">연결 상태</span>
+                  <span className="text-textMuted">{statusMessage}</span>
+                </div>
+              </Card>
+              <Card title="요약" meta="오늘 화면에 표시된 실제 흐름입니다.">
+                <div className="grid grid-cols-2 gap-2">
+                  {metrics.map(([label, value]) => (
+                    <div key={label} className="rounded-sm border border-border bg-input p-3">
+                      <div className="text-[11px] font-semibold text-textMuted">{label}</div>
+                      <div className="mt-1 text-[20px] font-bold text-textPrimary">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+              <FeedbackPanel />
+              <Card title="최근 흐름" meta="성공률이 아니라 반응 신호를 확인합니다.">
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {["선택", "이번엔 넘기기", "나중에 보기", "더 작게"].map((signal) => (
+                    <Badge key={signal} tone={signal === "선택" ? "success" : "muted"}>
+                      {signal}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {!history && (
+                    <EmptyState
+                      title="아직 최근 흐름이 없습니다."
+                      description="Action이나 reaction이 저장되면 이곳에 표시됩니다."
+                    />
+                  )}
+                  {history?.actions.slice(0, 3).map((action) => (
+                    <div key={action.id} className="flex justify-between text-[12px]">
+                      <span className="text-textSecondary">{action.title}</span>
+                      <span className="text-textMuted">{action.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
+  );
+}
+
+interface CalendarBlock {
+  dayIndex: number;
+  slotIndex: number;
+  title: string;
+  meta: string;
+  tone: "active" | "neutral" | "soft";
+}
+
+function CalendarRow({
+  slot,
+  slotIndex,
+  blocks,
+}: {
+  slot: string;
+  slotIndex: number;
+  blocks: CalendarBlock[];
+}) {
+  return (
+    <>
+      <div className="min-h-[86px] border-r border-t border-border px-2 py-3 font-medium text-textMuted">
+        {slot}
+      </div>
+      {weekDays.map((day, dayIndex) => {
+        const block = blocks.find(
+          (item) => item.dayIndex === dayIndex && item.slotIndex === slotIndex,
+        );
+        return (
+          <div
+            key={`${day}-${slot}`}
+            className="min-h-[86px] border-r border-t border-border bg-panel/60 p-2 last:border-r-0"
+          >
+            {block && (
+              <div
+                className={`rounded-sm border px-2 py-2 ${
+                  block.tone === "active"
+                    ? "border-primary bg-primary"
+                    : block.tone === "soft"
+                      ? "border-accent/35 bg-accentSoft"
+                      : "border-border bg-surface"
+                }`}
+              >
+                <div className="line-clamp-2 text-[12px] font-bold text-textPrimary">
+                  {block.title}
+                </div>
+                <div className="mt-1 text-[11px] text-textSecondary">{block.meta}</div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </>
   );
 }

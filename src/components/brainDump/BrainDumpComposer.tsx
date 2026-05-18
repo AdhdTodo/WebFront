@@ -25,10 +25,10 @@ export function BrainDumpComposer({
   return (
     <Card
       className="bg-surface/80"
-      title={compact ? "Brain Dump" : "New Brain Dump"}
+      title={compact ? "생각 쏟아내기" : "새 생각 쏟아내기"}
       meta={
         compact
-          ? "정리하지 않은 문장 그대로 입력하세요. 시스템이 2~5개의 micro-action으로 분해합니다."
+          ? "정리하지 않은 문장 그대로 입력하세요. 시스템이 2~5개의 작은 행동 후보로 분해합니다."
           : "생각을 정리하지 마세요. 여러 문장, 줄바꿈, 덩어리 입력 모두 허용합니다."
       }
     >
