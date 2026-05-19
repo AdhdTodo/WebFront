@@ -147,6 +147,8 @@ sudo certbot --nginx -d yangtheory.site -d www.yangtheory.site
 13. Direct `/actions/{actionId}` entry restores the Action with
     `GET /actions/{actionId}`.
 14. `/history` reads `/me/history` and shows recent flow and reaction signals.
+15. `/today` reads `/calendar/events`, can place the active Action as a calendar
+    block, and can download a standard `.ics` export.
 
 Protected pages are wrapped by `ProtectedRoute`. Logged-out direct access to
 `/today`, `/settings`, `/routines`, `/actions/:actionId`, and session suggestion
@@ -187,6 +189,22 @@ real API data; mock routines are visible only with `VITE_USE_MOCKS=true`.
 Active routines can start an Action directly with `이 루틴으로 시작`. The backend
 returns the created Action, the app stores it as `activeAction`, and the UI moves
 to `/actions/{actionId}`. Inactive routines keep their start button disabled.
+
+## Calendar Compatibility
+
+`/today` uses authenticated backend calendar data, not mock calendar blocks:
+
+```http
+GET /api/v1/calendar/events
+POST /api/v1/calendar/events
+GET /api/v1/calendar/events.ics
+```
+
+The current interoperability layer is iCalendar export. Users can place the
+active Action into the week view with `Action 배치`, then download
+`adhd-todo-calendar.ics` and import it into Google Calendar, Apple Calendar, or
+Outlook. The frontend does not call any external calendar provider directly.
+Two-way Google/Outlook OAuth sync remains a planned Calendar Import task.
 
 ## State Handling
 
@@ -299,6 +317,7 @@ Current next items:
 
 - AI prompt quality tuning after repeated real use as a separate opt-in task.
 - Mobile polish beyond the first responsive pass.
+- Two-way calendar provider sync after the `.ics` export layer is stable.
 - Calendar import as a one-time candidate ingestion flow.
 - refresh token httpOnly cookie migration.
 
@@ -376,6 +395,7 @@ Verified flow:
 15. Open `/routines`, create a routine, pause/activate it, start an Action from it, delete it, and refresh.
 16. Open `/settings`, edit nickname, and confirm the top-right profile updates.
 17. Change password in Settings, log out, and log back in with the new password.
+18. Return to `/today`, place the active Action with `Action 배치`, and download the `.ics` file.
 
 Latest manual/API verification result:
 

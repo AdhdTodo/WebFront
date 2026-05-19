@@ -50,6 +50,25 @@ export interface Action {
   updated_at: string;
 }
 
+export interface CalendarEvent {
+  id: number;
+  user_id: number;
+  session_id: number | null;
+  action_id: number | null;
+  title: string;
+  description: string | null;
+  start_at: string;
+  end_at: string;
+  timezone: string;
+  location: string | null;
+  source: "manual" | "action" | string;
+  external_uid: string | null;
+  provider: string | null;
+  external_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Feedback {
   id: number;
   session_id: number;
