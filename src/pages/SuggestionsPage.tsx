@@ -6,6 +6,7 @@ import { createFeedback } from "../api/feedback";
 import { listSessionBrainDumps } from "../api/sessions";
 import { listSuggestions } from "../api/suggestions";
 import { Badge } from "../components/common/Badge";
+import { Button } from "../components/common/Button";
 import { Card } from "../components/common/Card";
 import { EmptyState } from "../components/common/EmptyState";
 import { LoadingState } from "../components/common/LoadingState";
@@ -109,6 +110,14 @@ export function SuggestionsPage() {
     }
   }
 
+  function handleOpenCalendarCandidates() {
+    if (!sessionId) {
+      setStatusMessage("캘린더 후보를 만들 session이 없습니다.");
+      return;
+    }
+    navigate(`/sessions/${sessionId}/calendar-candidates`);
+  }
+
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
       <div className="space-y-5">
@@ -137,11 +146,20 @@ export function SuggestionsPage() {
           ))}
         </div>
         <Card className="p-3">
-          <div className="flex items-center justify-between text-[12px]">
+          <div className="flex flex-col gap-3 text-[12px] md:flex-row md:items-center md:justify-between">
             <span className="font-semibold text-textSecondary">
               {loading ? "loading" : "suggestion flow"}
             </span>
-            <span className="text-textMuted">{statusMessage}</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-textMuted">{statusMessage}</span>
+              <Button
+                variant="primary"
+                disabled={!sessionId || parentSuggestions.length === 0}
+                onClick={handleOpenCalendarCandidates}
+              >
+                캘린더 후보 검토
+              </Button>
+            </div>
           </div>
         </Card>
         {loading && <LoadingState message="session 기준 suggestion을 불러오는 중입니다." />}

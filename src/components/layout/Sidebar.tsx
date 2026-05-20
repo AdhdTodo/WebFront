@@ -18,6 +18,7 @@ const groups = [
       { to: "/today", label: "오늘", icon: ClipboardList },
       { to: "/brain-dumps", label: "생각 쏟아내기", icon: ListChecks },
       { to: "/suggestions", label: "행동 후보", icon: Sparkles },
+      { to: "/calendar", label: "캘린더", icon: CalendarDays },
       { to: "/actions/active", label: "실행", icon: CheckSquare },
     ],
   },

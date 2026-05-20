@@ -7,6 +7,8 @@ import { PublicOnlyRoute } from "./components/auth/PublicOnlyRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ActiveActionPage } from "./pages/ActiveActionPage";
 import { BrainDumpPage } from "./pages/BrainDumpPage";
+import { CalendarCandidatesPage } from "./pages/CalendarCandidatesPage";
+import { CalendarPage } from "./pages/CalendarPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -53,6 +55,11 @@ export function App() {
           <Route path="/brain-dumps" element={<BrainDumpPage />} />
           <Route path="/suggestions" element={<SuggestionsPage />} />
           <Route path="/sessions/:sessionId/suggestions" element={<SuggestionsPage />} />
+          <Route
+            path="/sessions/:sessionId/calendar-candidates"
+            element={<CalendarCandidatesPage />}
+          />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/actions/active" element={<ActiveActionPage />} />
           <Route path="/actions/:actionId" element={<ActiveActionPage />} />
           <Route path="/history" element={<HistoryPage />} />

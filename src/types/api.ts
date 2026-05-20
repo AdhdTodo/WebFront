@@ -69,6 +69,54 @@ export interface CalendarEvent {
   updated_at: string;
 }
 
+export type CalendarCandidateType =
+  | "fixed_time"
+  | "flexible"
+  | "deadline_based"
+  | "routine"
+  | "recovery";
+export type CalendarPreferredTimeBlock =
+  | "morning"
+  | "afternoon"
+  | "evening"
+  | "night"
+  | "anytime";
+export type CalendarCandidateLevel = "low" | "medium" | "high";
+export type CalendarSplitStrategy = "single_block" | "multiple_blocks" | "tiny_first_step";
+export type CalendarCandidateStatus = "proposed" | "accepted" | "rejected" | "scheduled";
+
+export interface CalendarCandidate {
+  id: number;
+  user_id: number;
+  session_id: number;
+  suggestion_id: number | null;
+  action_id: number | null;
+  title: string;
+  micro_step: string;
+  candidate_type: CalendarCandidateType;
+  estimated_minutes: number;
+  min_minutes: number;
+  max_minutes: number;
+  preferred_date: string | null;
+  earliest_start_at: string | null;
+  latest_end_at: string | null;
+  due_at: string | null;
+  preferred_time_block: CalendarPreferredTimeBlock;
+  energy_level: CalendarCandidateLevel;
+  friction_level: CalendarCandidateLevel;
+  split_strategy: CalendarSplitStrategy;
+  status: CalendarCandidateStatus;
+  reason: string | null;
+  timezone: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CalendarCandidateScheduleResponse {
+  candidate: CalendarCandidate;
+  event: CalendarEvent;
+}
+
 export interface Feedback {
   id: number;
   session_id: number;
