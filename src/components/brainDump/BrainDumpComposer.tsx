@@ -40,7 +40,7 @@ export function BrainDumpComposer({
       />
       <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] text-textMuted">쉼표, 줄바꿈, 긴 문장 모두 그대로 두세요.</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Button
             variant="secondary"
             icon={<Archive size={15} />}

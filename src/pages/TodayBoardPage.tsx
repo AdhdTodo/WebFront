@@ -215,7 +215,7 @@ export function TodayBoardPage() {
 
   return (
     <div className="space-y-5">
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
         <div className="space-y-5">
           <BrainDumpComposer compact loading={loading} onSubmit={handleCreateBrainDump} />
           <SuggestionBoard
