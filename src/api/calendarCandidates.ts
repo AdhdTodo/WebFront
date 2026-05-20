@@ -6,6 +6,9 @@ export interface CalendarCandidateScheduleInput {
   end_at: string;
   timezone?: string;
   location?: string;
+  placement_source?: string;
+  is_locked?: boolean;
+  user_note?: string;
 }
 
 export async function listCalendarCandidates(sessionId: number) {
@@ -36,6 +39,22 @@ export async function scheduleCalendarCandidate(
   const response = await apiClient.post<CalendarCandidateScheduleResponse>(
     `/calendar/candidates/${candidateId}/schedule`,
     payload,
+  );
+  return response.data;
+}
+
+export async function scheduleSuggestionAsCalendarCandidate(
+  sessionId: number,
+  suggestionId: number,
+  payload: CalendarCandidateScheduleInput,
+) {
+  const response = await apiClient.post<CalendarCandidateScheduleResponse>(
+    "/calendar/candidates/from-suggestion/schedule",
+    {
+      session_id: sessionId,
+      suggestion_id: suggestionId,
+      ...payload,
+    },
   );
   return response.data;
 }

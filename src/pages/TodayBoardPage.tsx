@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { abortAction, completeAction } from "../api/actions";
@@ -8,6 +8,7 @@ import {
   downloadCalendarIcs,
   listCalendarEvents,
 } from "../api/calendar";
+import { scheduleSuggestionAsCalendarCandidate } from "../api/calendarCandidates";
 import { getApiErrorMessage } from "../api/errors";
 import { createFeedback } from "../api/feedback";
 import { getHistory } from "../api/history";
@@ -25,7 +26,9 @@ import { useAppStore } from "../store/appStore";
 import type { Action, CalendarEvent, HistoryResponse, Suggestion } from "../types/api";
 
 const weekDays = ["월", "화", "수", "목", "금", "토", "일"];
-const timeSlots = ["09:00", "10:30", "13:00", "14:30", "16:00"];
+type CalendarView = "month" | "week" | "day";
+
+const timeSlots = ["08:00", "09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00", "20:00"];
 
 export function TodayBoardPage() {
   const navigate = useNavigate();
@@ -44,6 +47,13 @@ export function TodayBoardPage() {
   );
   const [history, setHistory] = useState<HistoryResponse | null>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarView, setCalendarView] = useState<CalendarView>("week");
+  const [selectedSlot, setSelectedSlot] = useState<Date>(nextHalfHourSlot());
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    slot: Date;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [calendarLoading, setCalendarLoading] = useState(false);
   const suggestions =
@@ -52,8 +62,18 @@ export function TodayBoardPage() {
     (suggestion) => suggestion.generation_type !== "smaller",
   );
   const recentActions = history?.actions.slice(0, 4) ?? [];
-  const weekStart = useMemo(() => startOfWeek(new Date()), []);
+  const today = useMemo(() => new Date(), []);
+  const weekStart = useMemo(() => startOfWeek(today), [today]);
   const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart]);
+  const monthStart = useMemo(() => startOfMonthGrid(today), [today]);
+  const monthEnd = useMemo(() => addDays(monthStart, 42), [monthStart]);
+  const dayStart = useMemo(() => startOfDay(today), [today]);
+  const dayEnd = useMemo(() => addDays(dayStart, 1), [dayStart]);
+  const [rangeStart, rangeEnd] = useMemo(() => {
+    if (calendarView === "month") return [monthStart, monthEnd];
+    if (calendarView === "day") return [dayStart, dayEnd];
+    return [weekStart, weekEnd];
+  }, [calendarView, dayEnd, dayStart, monthEnd, monthStart, weekEnd, weekStart]);
   const calendarBlocks = useMemo(
     () => calendarEvents.map((event) => toCalendarBlock(event, weekStart)),
     [calendarEvents, weekStart],
@@ -68,19 +88,19 @@ export function TodayBoardPage() {
   useEffect(() => {
     refreshCalendarEvents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [calendarView]);
 
   const metrics = [
     ["행동 후보", String(visibleSuggestions.length)],
     ["실행 중", activeAction?.status === "active" ? "1" : "0"],
     ["캘린더 블록", String(calendarEvents.length)],
-    ["보기", "주간"],
+    ["보기", viewLabel(calendarView)],
   ];
 
   async function refreshCalendarEvents() {
     setCalendarLoading(true);
     try {
-      const events = await listCalendarEvents(weekStart.toISOString(), weekEnd.toISOString());
+      const events = await listCalendarEvents(rangeStart.toISOString(), rangeEnd.toISOString());
       setCalendarEvents(events);
     } catch (error) {
       setStatusMessage(getApiErrorMessage(error));
@@ -197,6 +217,44 @@ export function TodayBoardPage() {
     }
   }
 
+  async function handleScheduleSuggestion(suggestion: Suggestion) {
+    setCalendarLoading(true);
+    try {
+      const startAt = selectedSlot;
+      const endAt = new Date(startAt.getTime() + defaultSuggestionMinutes(suggestion) * 60_000);
+      const response = await scheduleSuggestionAsCalendarCandidate(
+        suggestion.session_id,
+        suggestion.id,
+        {
+          start_at: startAt.toISOString(),
+          end_at: endAt.toISOString(),
+          timezone: "Asia/Seoul",
+          placement_source: "calendar_cell",
+        },
+      );
+      await refreshCalendarEvents();
+      setStatusMessage(
+        `"${response.event.title}"을 ${formatKoreanDateTime(startAt)} 캘린더에 놓았습니다.`,
+      );
+    } catch (error) {
+      setStatusMessage(getApiErrorMessage(error));
+    } finally {
+      setCalendarLoading(false);
+    }
+  }
+
+  function handleSelectSlot(slot: Date) {
+    setSelectedSlot(slot);
+    setContextMenu(null);
+    setStatusMessage(`${formatKoreanDateTime(slot)} 칸을 선택했습니다. 왼쪽 후보에서 캘린더에 놓기를 누르세요.`);
+  }
+
+  function handleOpenContextMenu(event: MouseEvent, slot: Date) {
+    event.preventDefault();
+    setSelectedSlot(slot);
+    setContextMenu({ x: event.clientX, y: event.clientY, slot });
+  }
+
   async function handleDownloadIcs() {
     try {
       const icsText = await downloadCalendarIcs();
@@ -223,6 +281,7 @@ export function TodayBoardPage() {
             onDo={handleDo}
             onMakeSmaller={handleMakeSmaller}
             onPass={handlePass}
+            onSchedule={handleScheduleSuggestion}
           />
         </div>
 
@@ -245,10 +304,11 @@ export function TodayBoardPage() {
                     <button
                       key={view}
                       className={`h-8 rounded-sm border px-3 font-semibold ${
-                        view === "주"
+                        view === viewLabel(calendarView)
                           ? "border-primary bg-primary text-textPrimary"
                           : "border-border bg-input text-textSecondary hover:border-accent"
                       }`}
+                      onClick={() => setCalendarView(toCalendarView(view))}
                       type="button"
                     >
                       {view}
@@ -274,33 +334,76 @@ export function TodayBoardPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-[64px_repeat(7,minmax(92px,1fr))] overflow-x-auto border border-border bg-input text-[12px]">
-              <div className="border-b border-r border-border bg-surface px-2 py-3 font-semibold text-textMuted">
-                시간
-              </div>
-              {weekDays.map((day) => (
-                <div
-                  key={day}
-                  className="border-b border-r border-border bg-surface px-3 py-3 font-bold text-textPrimary last:border-r-0"
-                >
-                  {day}
-                </div>
-              ))}
-              {timeSlots.map((slot, slotIndex) => (
-                <CalendarRow
-                  key={slot}
-                  slot={slot}
-                  slotIndex={slotIndex}
-                  blocks={calendarBlocks}
-                />
-              ))}
+            <div className="mt-3 border border-border bg-surface px-3 py-2 text-[12px] text-textSecondary">
+              선택된 시간:{" "}
+              <span className="font-bold text-textPrimary">{formatKoreanDateTime(selectedSlot)}</span>
             </div>
+
+            {calendarView === "month" && (
+              <MonthCalendar
+                events={calendarEvents}
+                monthStart={monthStart}
+                selectedSlot={selectedSlot}
+                onSelectSlot={handleSelectSlot}
+                onOpenContextMenu={handleOpenContextMenu}
+              />
+            )}
+            {calendarView === "week" && (
+              <WeekCalendar
+                weekStart={weekStart}
+                blocks={calendarBlocks}
+                selectedSlot={selectedSlot}
+                onSelectSlot={handleSelectSlot}
+                onOpenContextMenu={handleOpenContextMenu}
+              />
+            )}
+            {calendarView === "day" && (
+              <DayCalendar
+                date={today}
+                events={calendarEvents}
+                selectedSlot={selectedSlot}
+                onSelectSlot={handleSelectSlot}
+                onOpenContextMenu={handleOpenContextMenu}
+              />
+            )}
+
+            {contextMenu && (
+              <div
+                className="fixed z-50 w-[210px] border border-border bg-panel p-2 text-[12px] shadow-[0_12px_30px_rgba(47,52,50,0.08)]"
+                style={{ left: contextMenu.x, top: contextMenu.y }}
+              >
+                <button
+                  className="block w-full px-3 py-2 text-left font-semibold text-textPrimary hover:bg-primary"
+                  type="button"
+                  onClick={() => handleSelectSlot(contextMenu.slot)}
+                >
+                  이 시간 선택
+                </button>
+                <button
+                  className="block w-full px-3 py-2 text-left text-textSecondary hover:bg-surface"
+                  type="button"
+                  onClick={() => handleSelectSlot(new Date(contextMenu.slot.getTime() + 30 * 60_000))}
+                >
+                  30분 뒤로 선택
+                </button>
+                <button
+                  className="block w-full px-3 py-2 text-left text-textSecondary hover:bg-surface"
+                  type="button"
+                  onClick={() => {
+                    setContextMenu(null);
+                    navigate("/brain-dumps");
+                  }}
+                >
+                  생각 쏟아내기로 이동
+                </button>
+              </div>
+            )}
 
             {calendarBlocks.length === 0 && !calendarLoading && (
               <div className="mt-4">
                 <EmptyState
                   title="이번 주 캘린더 블록이 없습니다."
-                  description="Action을 선택한 뒤 캘린더에 배치하거나 .ics 파일로 다른 앱에 가져갈 수 있습니다."
+                  description="캘린더 칸을 클릭한 뒤 왼쪽 행동 후보에서 캘린더에 놓기를 누르면 바로 저장됩니다."
                 />
               </div>
             )}
@@ -370,14 +473,64 @@ interface CalendarBlock {
   tone: "active" | "neutral" | "soft";
 }
 
+function WeekCalendar({
+  weekStart,
+  blocks,
+  selectedSlot,
+  onSelectSlot,
+  onOpenContextMenu,
+}: {
+  weekStart: Date;
+  blocks: CalendarBlock[];
+  selectedSlot: Date;
+  onSelectSlot: (slot: Date) => void;
+  onOpenContextMenu: (event: MouseEvent, slot: Date) => void;
+}) {
+  return (
+    <div className="mt-4 grid grid-cols-[64px_repeat(7,minmax(92px,1fr))] overflow-x-auto border border-border bg-input text-[12px]">
+      <div className="border-b border-r border-border bg-surface px-2 py-3 font-semibold text-textMuted">
+        시간
+      </div>
+      {weekDays.map((day, index) => (
+        <div
+          key={day}
+          className="border-b border-r border-border bg-surface px-3 py-3 font-bold text-textPrimary last:border-r-0"
+        >
+          {day} <span className="text-textMuted">{addDays(weekStart, index).getDate()}</span>
+        </div>
+      ))}
+      {timeSlots.map((slot, slotIndex) => (
+        <CalendarRow
+          key={slot}
+          weekStart={weekStart}
+          slot={slot}
+          slotIndex={slotIndex}
+          blocks={blocks}
+          selectedSlot={selectedSlot}
+          onSelectSlot={onSelectSlot}
+          onOpenContextMenu={onOpenContextMenu}
+        />
+      ))}
+    </div>
+  );
+}
+
 function CalendarRow({
+  weekStart,
   slot,
   slotIndex,
   blocks,
+  selectedSlot,
+  onSelectSlot,
+  onOpenContextMenu,
 }: {
+  weekStart: Date;
   slot: string;
   slotIndex: number;
   blocks: CalendarBlock[];
+  selectedSlot: Date;
+  onSelectSlot: (slot: Date) => void;
+  onOpenContextMenu: (event: MouseEvent, slot: Date) => void;
 }) {
   return (
     <>
@@ -388,10 +541,16 @@ function CalendarRow({
         const cellBlocks = blocks.filter(
           (item) => item.dayIndex === dayIndex && item.slotIndex === slotIndex,
         );
+        const cellSlot = slotDate(addDays(weekStart, dayIndex), slot);
+        const selected = sameMinute(selectedSlot, cellSlot);
         return (
           <div
             key={`${day}-${slot}`}
-            className="min-h-[86px] space-y-2 border-r border-t border-border bg-panel/60 p-2 last:border-r-0"
+            className={`min-h-[86px] space-y-2 border-r border-t border-border p-2 last:border-r-0 ${
+              selected ? "bg-accentSoft" : "bg-panel/60 hover:bg-surface"
+            }`}
+            onClick={() => onSelectSlot(cellSlot)}
+            onContextMenu={(event) => onOpenContextMenu(event, cellSlot)}
           >
             {cellBlocks.map((block) => (
               <div
@@ -417,6 +576,104 @@ function CalendarRow({
   );
 }
 
+function MonthCalendar({
+  events,
+  monthStart,
+  selectedSlot,
+  onSelectSlot,
+  onOpenContextMenu,
+}: {
+  events: CalendarEvent[];
+  monthStart: Date;
+  selectedSlot: Date;
+  onSelectSlot: (slot: Date) => void;
+  onOpenContextMenu: (event: MouseEvent, slot: Date) => void;
+}) {
+  const days = Array.from({ length: 42 }, (_, index) => addDays(monthStart, index));
+  return (
+    <div className="mt-4 grid grid-cols-7 overflow-hidden border border-border bg-input text-[12px]">
+      {weekDays.map((day) => (
+        <div key={day} className="border-b border-r border-border bg-surface px-3 py-3 font-bold">
+          {day}
+        </div>
+      ))}
+      {days.map((day) => {
+        const cellSlot = slotDate(day, "09:00");
+        const cellEvents = events.filter((event) => sameDay(new Date(event.start_at), day));
+        return (
+          <div
+            key={day.toISOString()}
+            className={`min-h-[116px] space-y-2 border-b border-r border-border p-2 ${
+              sameDay(selectedSlot, cellSlot) ? "bg-accentSoft" : "bg-panel hover:bg-surface"
+            }`}
+            onClick={() => onSelectSlot(cellSlot)}
+            onContextMenu={(event) => onOpenContextMenu(event, cellSlot)}
+          >
+            <div className="font-bold text-textPrimary">{day.getDate()}</div>
+            {cellEvents.slice(0, 3).map((event) => (
+              <div key={event.id} className="border border-primary bg-primary px-2 py-1">
+                <div className="line-clamp-1 font-semibold">{event.title}</div>
+                <div className="text-[11px] text-textSecondary">
+                  {formatTime(new Date(event.start_at))}
+                </div>
+              </div>
+            ))}
+            {cellEvents.length > 3 && (
+              <div className="text-[11px] text-textMuted">+{cellEvents.length - 3}개</div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function DayCalendar({
+  date,
+  events,
+  selectedSlot,
+  onSelectSlot,
+  onOpenContextMenu,
+}: {
+  date: Date;
+  events: CalendarEvent[];
+  selectedSlot: Date;
+  onSelectSlot: (slot: Date) => void;
+  onOpenContextMenu: (event: MouseEvent, slot: Date) => void;
+}) {
+  return (
+    <div className="mt-4 border border-border bg-input text-[12px]">
+      {timeSlots.map((slot) => {
+        const cellSlot = slotDate(date, slot);
+        const cellEvents = events.filter((event) => sameMinute(new Date(event.start_at), cellSlot));
+        return (
+          <div key={slot} className="grid grid-cols-[72px_minmax(0,1fr)] border-b border-border">
+            <div className="border-r border-border bg-surface px-3 py-4 font-medium text-textMuted">
+              {slot}
+            </div>
+            <div
+              className={`min-h-[76px] space-y-2 p-3 ${
+                sameMinute(selectedSlot, cellSlot) ? "bg-accentSoft" : "bg-panel hover:bg-surface"
+              }`}
+              onClick={() => onSelectSlot(cellSlot)}
+              onContextMenu={(event) => onOpenContextMenu(event, cellSlot)}
+            >
+              {cellEvents.map((event) => (
+                <div key={event.id} className="border border-primary bg-primary px-3 py-2">
+                  <div className="font-bold text-textPrimary">{event.title}</div>
+                  <div className="text-[11px] text-textSecondary">
+                    {formatTime(new Date(event.start_at))} · {event.source}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function startOfWeek(date: Date) {
   const copy = new Date(date);
   const day = copy.getDay();
@@ -426,10 +683,46 @@ function startOfWeek(date: Date) {
   return copy;
 }
 
+function startOfMonthGrid(date: Date) {
+  const first = new Date(date.getFullYear(), date.getMonth(), 1);
+  return startOfWeek(first);
+}
+
+function startOfDay(date: Date) {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
 function addDays(date: Date, days: number) {
   const copy = new Date(date);
   copy.setDate(copy.getDate() + days);
   return copy;
+}
+
+function slotDate(date: Date, slot: string) {
+  const [hour, minute] = slot.split(":").map(Number);
+  const copy = new Date(date);
+  copy.setHours(hour, minute, 0, 0);
+  return copy;
+}
+
+function sameMinute(left: Date, right: Date) {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate() &&
+    left.getHours() === right.getHours() &&
+    left.getMinutes() === right.getMinutes()
+  );
+}
+
+function sameDay(left: Date, right: Date) {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
 }
 
 function nextHalfHourSlot() {
@@ -479,4 +772,32 @@ function formatTime(date: Date) {
     minute: "2-digit",
     hour12: false,
   }).format(date);
+}
+
+function formatKoreanDateTime(date: Date) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function viewLabel(view: CalendarView) {
+  if (view === "month") return "월";
+  if (view === "day") return "일";
+  return "주";
+}
+
+function toCalendarView(label: string): CalendarView {
+  if (label === "월") return "month";
+  if (label === "일") return "day";
+  return "week";
+}
+
+function defaultSuggestionMinutes(suggestion: Suggestion) {
+  if (suggestion.effort_level === "nano" || suggestion.effort_level === "tiny") return 15;
+  if (suggestion.effort_level === "quiet") return 20;
+  return 30;
 }

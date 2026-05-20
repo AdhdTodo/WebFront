@@ -8,6 +8,7 @@ interface SuggestionBoardProps {
   onDo?: (suggestion: Suggestion) => void;
   onMakeSmaller?: (suggestion: Suggestion) => void;
   onPass?: (suggestion: Suggestion) => void;
+  onSchedule?: (suggestion: Suggestion) => void;
 }
 
 export function SuggestionBoard({
@@ -15,6 +16,7 @@ export function SuggestionBoard({
   onDo,
   onMakeSmaller,
   onPass,
+  onSchedule,
 }: SuggestionBoardProps) {
   return (
     <Card title="행동 후보" meta="처음부터 하나만 고르지 않고 후보를 비교합니다.">
@@ -32,6 +34,7 @@ export function SuggestionBoard({
             onDo={onDo}
             onMakeSmaller={onMakeSmaller}
             onPass={onPass}
+            onSchedule={onSchedule}
           />
         ))}
       </div>

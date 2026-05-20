@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Check, MinusCircle } from "lucide-react";
+import { ArrowDownToLine, CalendarPlus, Check, MinusCircle } from "lucide-react";
 
 import type { Suggestion } from "../../types/api";
 import { Badge } from "../common/Badge";
@@ -10,6 +10,7 @@ interface SuggestionCardProps {
   onDo?: (suggestion: Suggestion) => void;
   onMakeSmaller?: (suggestion: Suggestion) => void;
   onPass?: (suggestion: Suggestion) => void;
+  onSchedule?: (suggestion: Suggestion) => void;
 }
 
 export function SuggestionCard({
@@ -18,6 +19,7 @@ export function SuggestionCard({
   onDo,
   onMakeSmaller,
   onPass,
+  onSchedule,
 }: SuggestionCardProps) {
   return (
     <article className="rounded-card border border-border bg-panel p-4 transition hover:border-accent/45 hover:bg-surface">
@@ -37,6 +39,15 @@ export function SuggestionCard({
           <Button variant="primary" icon={<Check size={14} />} onClick={() => onDo?.(suggestion)}>
             선택
           </Button>
+          {onSchedule && (
+            <Button
+              variant="quiet"
+              icon={<CalendarPlus size={14} />}
+              onClick={() => onSchedule(suggestion)}
+            >
+              캘린더에 놓기
+            </Button>
+          )}
           <Button
             variant="secondary"
             icon={<ArrowDownToLine size={14} />}

@@ -55,6 +55,7 @@ export interface CalendarEvent {
   user_id: number;
   session_id: number | null;
   action_id: number | null;
+  candidate_id: number | null;
   title: string;
   description: string | null;
   start_at: string;
@@ -62,6 +63,10 @@ export interface CalendarEvent {
   timezone: string;
   location: string | null;
   source: "manual" | "action" | string;
+  status: string;
+  display_color: string | null;
+  is_soft_block: boolean;
+  reschedule_count: number;
   external_uid: string | null;
   provider: string | null;
   external_id: string | null;
@@ -91,6 +96,7 @@ export interface CalendarCandidate {
   session_id: number;
   suggestion_id: number | null;
   action_id: number | null;
+  calendar_event_id: number | null;
   title: string;
   micro_step: string;
   candidate_type: CalendarCandidateType;
@@ -101,11 +107,17 @@ export interface CalendarCandidate {
   earliest_start_at: string | null;
   latest_end_at: string | null;
   due_at: string | null;
+  planned_start_at: string | null;
+  planned_end_at: string | null;
   preferred_time_block: CalendarPreferredTimeBlock;
   energy_level: CalendarCandidateLevel;
   friction_level: CalendarCandidateLevel;
   split_strategy: CalendarSplitStrategy;
   status: CalendarCandidateStatus;
+  placement_source: string;
+  is_locked: boolean;
+  conflict_status: string;
+  user_note: string | null;
   reason: string | null;
   timezone: string;
   created_at: string;
